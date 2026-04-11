@@ -110,7 +110,7 @@
 
   <!-- ════ 上半期 ════ -->
   <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
-    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">上半期（4〜9月）</p>
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">下半期（3〜8月）</p>
 
     <!-- KPIs -->
     <div class="flex flex-wrap gap-2.5 mb-5">
@@ -253,31 +253,32 @@
      DATA — single source of truth
   ══════════════════════════════════════════════════════════ */
   const DATA = {
-    period:   { month: '2026年3月度', halfYear: '2026年3〜9月', updatedAt: '2026/03/11' },
+    period:   { month: '2026年4月度', halfYear: '2026年3〜8月', updatedAt: '2026/04/11' },
     month: {
-      revenueActual:    800,   // ¥8,000,000
-      revenueTarget:    900,   // ¥9,000,000
-      lastYearActual:   750,   // ¥7,500,000
+      revenueActual:    423.41,   // ¥4,234,068
+      revenueTarget:    700,      // ¥7,000,000
+      lastYearActual:   1152.44,  // ¥11,524,426
     },
     halfYear: {
-      actual: 10_000,          // ¥100,000,000
-      target: 12_000,          // ¥120,000,000
+      actual: 2327.04,   // ¥23,270,356
+      target: 4900,      // ¥49,000,000
     },
     deals: {
-      current:  48,
-      previous: 45,
+      current:  29,
+      previous: 159,
     },
     monthly: {
-      months:   ['4月','5月','6月','7月','8月','9月'],
-      target:   [1800, 1900, 2000, 2100, 2000, 2200],
-      actual:   [1500, 1700, 1600, 1800, 1600, 1800],
-      lastYear: [1400, 1500, 1550, 1700, 1450, 1700],
+      months:   ['3月','4月','5月','6月','7月','8月'],
+      target:   [1400,   700,  700,  700,  700,  700],
+      actual:   [1903.6, 423.4,  0,    0,    0,    0],
+      lastYear: [1176.9, 1152.4, 1052.9, 1004.9, 912.8, 567.1],
     },
     customers: [
-      { name: 'AAAAAAAA', amountMan: 200, prevDiffMan: +10 },
-      { name: 'BBBBBBBB', amountMan: 180, prevDiffMan:  +5 },
-      { name: 'CCCCCCC',  amountMan: 150, prevDiffMan:  -8 },
-      { name: 'DDDDDDD',  amountMan: 120, prevDiffMan:  -3 },
+      { name: 'Allie',      amountMan: 206.83, prevDiffMan: +164.07 },
+      { name: 'Graceful',   amountMan:  15.91, prevDiffMan:  -14.91 },
+      { name: 'Y Knc',      amountMan:   6.25, prevDiffMan:   -1.70 },
+      { name: '海外（専）',  amountMan:   3.50, prevDiffMan: -869.87 },
+      { name: 'In-Nihor',   amountMan:   0.35, prevDiffMan:   +0.35 },
     ],
   };
 
