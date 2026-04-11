@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売上進捗ダッシュボード — テンプレートプレビュー</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Noto Sans JP', sans-serif; }
+  @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes rowIn  { to   { opacity:1; transform:translateX(0); } }
+  @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:.6} }
+  .gb {
+    background:
+      linear-gradient(#1a1a1a, #1a1a1a) padding-box,
+      linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 45%, rgba(255,255,255,.10) 100%) border-box;
+    border: 1px solid transparent;
+  }
+  .gb-amber {
+    background:
+      linear-gradient(#1a1200, #1a1200) padding-box,
+      linear-gradient(135deg, rgba(251,191,36,.5) 0%, rgba(251,191,36,.15) 50%, rgba(251,191,36,.35) 100%) border-box;
+    border: 1px solid transparent;
+  }
+  .row-in { opacity:0; transform:translateX(-10px); animation:rowIn .4s ease-out forwards; }
+  .tip { position:fixed; pointer-events:none; opacity:0; transition:opacity .15s; z-index:100; }
+  .tip.visible { opacity:1; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  .ph {
+    display:inline-block;
+    background: rgba(251,191,36,.15);
+    border: 1px dashed rgba(251,191,36,.6);
+    color: #fbbf24;
+    border-radius: 5px;
+    padding: 0 5px;
+    font-size: .72rem;
+    font-family: monospace;
+    font-weight: 700;
+    animation: pulse 2s ease-in-out infinite;
+    white-space: nowrap;
+  }
+  .focusable:focus-visible { outline:2px solid rgba(255,255,255,.6); outline-offset:3px; border-radius:6px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+
+<body class="min-h-screen bg-[#111111] text-[#f0f0f0] px-7 pt-8 pb-14"
+      style="opacity:0;animation:pageIn .5s ease-out .05s forwards">
+
+<div class="max-w-[920px] mx-auto">
+
+  <!-- ══ テンプレートバナー ══ -->
+  <div class="gb-amber rounded-2xl p-4 mb-5 flex items-start gap-3">
+    <span class="text-2xl mt-0.5">📋</span>
+    <div>
+      <p class="font-extrabold text-amber-300 text-[1rem] mb-1">テンプレートプレビューモード</p>
+      <p class="text-amber-200/70 text-sm">
+        黄色の <code class="ph">{{プレースホルダー}}</code> の部分が、
+        Power Automate が Excel から読み取った値に自動置き換えられます。<br>
+        実際に配信されるレポートはこのレイアウトのまま、数字だけが入れ替わります。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ マッピング一覧 ══ -->
+  <div class="gb rounded-[22px] p-5 mb-5">
+    <p class="text-base font-bold text-gray-200 mb-4">📊 Excel 列 ↔ ダッシュボード 対応表</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
+
+      <div class="col-span-full text-[.7rem] font-bold text-gray-500 uppercase tracking-widest mb-1 pb-1 border-b border-white/[.06]">
+        シート: 月次サマリー
+      </div>
+
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">年月</span>
+        <span class="ph">{{PERIOD_MONTH}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">更新日</span>
+        <span class="ph">{{UPDATED_AT}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">今月実績</span>
+        <span class="ph">{{MONTH_ACTUAL}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">今月目標</span>
+        <span class="ph">{{MONTH_TARGET}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">昨年実績</span>
+        <span class="ph">{{MONTH_LY}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">半期実績</span>
+        <span class="ph">{{HALF_ACTUAL}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">半期目標</span>
+        <span class="ph">{{HALF_TARGET}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5 border-b border-white/[.04]">
+        <span class="text-gray-400">今月件数</span>
+        <span class="ph">{{DEAL_CURRENT}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5">
+        <span class="text-gray-400">前月件数</span>
+        <span class="ph">{{DEAL_PREV}}</span>
+      </div>
+      <div class="flex items-center justify-between gap-3 py-1.5">
+        <span class="text-gray-400">月次推移（目標/実績/昨年 × 6ヶ月）</span>
+        <span class="ph">{{MONTHLY_*}}</span>
+      </div>
+
+      <div class="col-span-full text-[.7rem] font-bold text-gray-500 uppercase tracking-widest mt-3 mb-1 pb-1 border-b border-white/[.06]">
+        シート: 顧客別
+      </div>
+
+      <div class="flex items-center justify-between gap-3 py-1.5">
+        <span class="text-gray-400">顧客名・今月売上・前月売上（複数行）</span>
+        <span class="ph">{{CUSTOMERS}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ダッシュボード本体（実データ入りプレビュー） ══ -->
+  <p class="text-[.7rem] font-bold text-gray-600 uppercase tracking-widest mb-3 pl-1">
+    ↓ 実際に配信されるレポートのレイアウト（サンプルデータ入り）
+  </p>
+
+  <!-- Header -->
+  <header class="flex justify-between items-start mb-7 pb-5 border-b border-white/[.08]">
+    <div>
+      <h1 class="text-[2rem] font-extrabold tracking-tight
+                 bg-gradient-to-br from-white via-gray-300 to-gray-400
+                 bg-clip-text text-transparent">
+        売上進捗ダッシュボード
+      </h1>
+      <p class="mt-1 text-sm text-gray-500" id="hd-period">—</p>
+    </div>
+    <div class="mt-0.5 px-3.5 py-1.5 rounded-lg text-xs text-gray-500
+                bg-white/[.04] border border-white/[.08] whitespace-nowrap"
+         id="hd-updated">—</div>
+  </header>
+
+  <!-- 今月 -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">今月</p>
+    <div class="flex flex-wrap gap-2.5">
+      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)] cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">売上実績</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-month-actual">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-target-sub">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">目標対比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">昨年比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-yoy-sub">—</p>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center gap-2.5">
+      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
+        <div id="prog-month" class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300"></div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold whitespace-nowrap" id="prog-month-label">—</span>
+        <span class="text-[10px] text-gray-600">当月目標達成率</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 上半期 -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">上半期（4〜9月）</p>
+    <div class="flex flex-wrap gap-2.5 mb-5">
+      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)] cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">半期実績</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-half-actual">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-half-target-sub">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">半期目標比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-half-vs-target">—</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <div class="flex-[3_1_320px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4">
+        <p class="text-xs font-semibold text-gray-500 mb-2">月次推移</p>
+        <div class="flex gap-3.5 mb-2">
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500"><span class="inline-block w-3 h-2.5 rounded-sm bg-gray-400/50"></span>目標</span>
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500"><span class="inline-block w-4 border-t-2 border-emerald-400"></span>実績</span>
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500"><span class="inline-block w-4 border-t-2 border-dashed border-amber-400"></span>昨年</span>
+        </div>
+        <svg id="trend" role="img" viewBox="0 0 540 195" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;overflow:visible">
+          <title>上半期の月次売上推移グラフ</title>
+        </svg>
+      </div>
+      <div class="flex-[1_1_175px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4 flex flex-col items-center">
+        <p class="self-start text-xs font-semibold text-gray-500 mb-1">半期累積 達成メーター</p>
+        <div class="w-full flex justify-center my-1.5">
+          <svg id="gauge" role="img" viewBox="0 0 220 118" width="100%" style="max-width:240px;overflow:visible">
+            <title>半期目標達成率メーター</title>
+            <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+            <path id="g-track" fill="none" stroke="#2a2a2a" stroke-width="13" stroke-linecap="round"/>
+            <path id="g-glow"  fill="none" stroke-width="18" stroke-linecap="round" opacity=".25" filter="url(#glow)"/>
+            <path id="g-value" fill="none" stroke-width="13" stroke-linecap="round"/>
+            <text id="g-pct" x="110" y="84" text-anchor="middle" fill="#f0f0f0" font-size="24" font-weight="800" font-family="-apple-system,Inter,sans-serif">—</text>
+            <text id="g-sub" x="110" y="101" text-anchor="middle" fill="#6b7280" font-size="10" font-family="-apple-system,Inter,sans-serif">—</text>
+            <text x="34"  y="115" text-anchor="middle" fill="#6b7280" font-size="9" font-family="-apple-system,Inter,sans-serif">0%</text>
+            <text x="186" y="115" text-anchor="middle" fill="#6b7280" font-size="9" font-family="-apple-system,Inter,sans-serif">100%</text>
+          </svg>
+        </div>
+        <div class="w-full space-y-1.5 mt-1" id="gauge-stats"></div>
+        <p class="self-start text-[10px] text-gray-600 mt-2">半期目標達成率</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 件数 -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">件数</p>
+    <div class="flex flex-wrap gap-2.5 justify-start">
+      <div class="flex-[2_1_155px] max-w-xs bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">今月件数</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-deal-count">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-deal-prev-sub">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] max-w-[180px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">前月比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-deal-mom">—</p>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center gap-2.5">
+      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
+        <div id="prog-count" class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300"></div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold whitespace-nowrap" id="prog-count-label">—</span>
+        <span class="text-[10px] text-gray-600">前月比</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 顧客別 -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">顧客別売上（今月）</p>
+    <div class="flex flex-col" id="customer-list" aria-label="顧客別売上ランキング"></div>
+  </section>
+
+</div>
+
+<!-- Tooltip -->
+<div class="tip bg-[rgba(10,10,10,.95)] border border-white/[.12] rounded-xl p-3 text-xs min-w-[130px]" id="tip" role="tooltip">
+  <p class="font-bold text-[#f0f0f0] mb-1.5" id="tip-month"></p>
+  <div class="flex justify-between gap-3 mt-1"><span class="text-gray-500">目標</span><span class="font-semibold text-gray-300" id="tip-target"></span></div>
+  <div class="flex justify-between gap-3 mt-1"><span class="text-gray-500">実績</span><span class="font-semibold text-emerald-400" id="tip-actual"></span></div>
+  <div class="flex justify-between gap-3 mt-1"><span class="text-gray-500">昨年</span><span class="font-semibold text-amber-400" id="tip-ly"></span></div>
+</div>
+<div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ══ サンプルデータ（実際はここが Power Automate で置き換わる） ══ */
+  const DATA = {
+    period:   { month: '2026年3月度', halfYear: '2026年3〜9月', updatedAt: '2026/03/11' },
+    month:    { revenueActual: 800, revenueTarget: 900, lastYearActual: 750 },
+    halfYear: { actual: 10_000, target: 12_000 },
+    deals:    { current: 48, previous: 45 },
+    monthly: {
+      months:   ['4月','5月','6月','7月','8月','9月'],
+      target:   [1800, 1900, 2000, 2100, 2000, 2200],
+      actual:   [1500, 1700, 1600, 1800, 1600, 1800],
+      lastYear: [1400, 1500, 1550, 1700, 1450, 1700],
+    },
+    customers: [
+      { name: 'AAAAAAAA', amountMan: 200, prevDiffMan: +10 },
+      { name: 'BBBBBBBB', amountMan: 180, prevDiffMan:  +5 },
+      { name: 'CCCCCCC',  amountMan: 150, prevDiffMan:  -8 },
+      { name: 'DDDDDDD',  amountMan: 120, prevDiffMan:  -3 },
+    ],
+  };
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(id) { return document.getElementById(id); }
+  const yen    = n => `¥${(n * 10000).toLocaleString()}`;
+  const pctStr = (a, b) => `${((a / b) * 100).toFixed(1)}%`;
+  const diffStr = (a, b) => { const v = +((a/b)*100-100).toFixed(1); return v>=0?`+${v.toFixed(1)}%`:`${v.toFixed(1)}%`; };
+  const isPos = s => s.startsWith('+');
+  const colorFor = s => isPos(s) ? '#34d399' : '#fb7185';
+  const gaugeColor = r => r>=.9?'#34d399':r>=.8?'#fbbf24':'#fb7185';
+  function niceGrid(min,max,step=500){const r=[];for(let v=Math.ceil(min/step)*step;v<=max;v+=step)r.push(v);return r;}
+  function placeTip(tip,x,y){const m=12,w=tip.offsetWidth||140,h=tip.offsetHeight||110;tip.style.left=Math.min(x+16,window.innerWidth-w-m)+'px';tip.style.top=Math.min(Math.max(y-10,m),window.innerHeight-h-m)+'px';}
+  function setText(id,t,c){const e=$(id);if(!e)return;e.textContent=t;if(c)e.style.color=c;}
+
+  function renderKPIs() {
+    const { month, halfYear, deals, period } = DATA;
+    setText('hd-period',  `${period.month} / 下半期: ${period.halfYear}`);
+    setText('hd-updated', `最終更新: ${period.updatedAt}`);
+    const mVsT = diffStr(month.revenueActual, month.revenueTarget);
+    const mYoY = diffStr(month.revenueActual, month.lastYearActual);
+    setText('v-month-actual',     yen(month.revenueActual));
+    setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
+    setText('v-month-vs-target',  mVsT, colorFor(mVsT));
+    setText('v-month-yoy',        mYoY, colorFor(mYoY));
+    setText('v-month-yoy-sub',    `昨年実績: ${yen(month.lastYearActual)}`);
+    const monthPct = (month.revenueActual/month.revenueTarget)*100;
+    const mc = gaugeColor(month.revenueActual/month.revenueTarget);
+    setText('prog-month-label', pctStr(month.revenueActual, month.revenueTarget), mc);
+    const pm=$('prog-month'); if(pm){pm.style.background=`linear-gradient(90deg,${mc}99,${mc})`;setTimeout(()=>{pm.style.width=Math.min(monthPct,100)+'%';},300);}
+    const hVsT = diffStr(halfYear.actual, halfYear.target);
+    setText('v-half-actual',     yen(halfYear.actual));
+    setText('v-half-target-sub', `目標: ${yen(halfYear.target)}`);
+    setText('v-half-vs-target',  hVsT, colorFor(hVsT));
+    const dealMoM = diffStr(deals.current, deals.previous);
+    setText('v-deal-count',    `${deals.current}件`);
+    setText('v-deal-prev-sub', `前月: ${deals.previous}件`);
+    setText('v-deal-mom',      dealMoM, colorFor(dealMoM));
+    setText('prog-count-label', dealMoM, colorFor(dealMoM));
+    const pc=$('prog-count'); if(pc){const dc=colorFor(dealMoM);pc.style.background=`linear-gradient(90deg,${dc}99,${dc})`;setTimeout(()=>{pc.style.width=Math.min((deals.current/deals.previous)*100,100)+'%';},300);}
+  }
+
+  function initGauge() {
+    const track=$('g-track'),glow=$('g-glow'),value=$('g-value'),pctEl=$('g-pct'),subEl=$('g-sub'),statsEl=$('gauge-stats');
+    if(!track||!value)return;
+    const R=76,cx=110,cy=98,d=`M ${cx-R} ${cy} A ${R} ${R} 0 1 1 ${cx+R} ${cy}`;
+    [track,glow,value].forEach(p=>p.setAttribute('d',d));
+    const {actual,target}=DATA.halfYear, ratio=actual/target, color=gaugeColor(ratio);
+    glow.setAttribute('stroke',color); value.setAttribute('stroke',color);
+    const len=track.getTotalLength(), to=len*(1-ratio);
+    value.style.strokeDasharray=len; value.style.strokeDashoffset=len;
+    glow.style.strokeDasharray=len;  glow.style.strokeDashoffset=len;
+    if(reduceMotion){value.style.strokeDashoffset=to;glow.style.strokeDashoffset=to;if(pctEl)pctEl.textContent=(ratio*100).toFixed(1)+'%';}
+    else{requestAnimationFrame(()=>requestAnimationFrame(()=>{const e='cubic-bezier(.4,0,.15,1)';value.style.transition=`stroke-dashoffset 1.7s ${e}`;glow.style.transition=`stroke-dashoffset 1.7s ${e}`;value.style.strokeDashoffset=to;glow.style.strokeDashoffset=to;}));const t0=performance.now(),dur=1700;(function tick(now){const p=Math.min((now-t0)/dur,1),e2=1-Math.pow(1-p,3);if(pctEl)pctEl.textContent=(e2*ratio*100).toFixed(1)+'%';if(p<1)requestAnimationFrame(tick);})(performance.now());}
+    if(subEl)subEl.textContent=`${yen(actual)} / ${yen(target)}`;
+    if(statsEl)statsEl.innerHTML=[['目標',yen(target),'#f0f0f0'],['実績',yen(actual),'#34d399'],['達成率',pctStr(actual,target),'#d1d5db'],['残額',yen(target-actual),'#fb7185']].map(([k,v,c])=>`<div class="flex justify-between text-xs${k!=='目標'?' pt-1.5 border-t border-white/[.05]':''}"><span class="text-gray-500">${k}</span><span class="font-semibold" style="color:${c}">${v}</span></div>`).join('');
+  }
+
+  function buildChart() {
+    const svg=$('trend'); if(!svg)return;
+    const {months,target,actual,lastYear}=DATA.monthly;
+    const W=540,H=195,pad={t:12,r:16,b:34,l:44},pw=W-pad.l-pad.r,ph=H-pad.t-pad.b,n=months.length;
+    const allVals=[...target,...actual,...lastYear],rawMin=Math.min(...allVals),rawMax=Math.max(...allVals),step=500;
+    const yMin=Math.floor(rawMin/step)*step-step,yMax=Math.ceil(rawMax/step)*step+step,yRange=yMax-yMin;
+    const colW=pw/n,barW=colW*.42,yBot=pad.t+ph;
+    const xOf=i=>pad.l+(i+.5)*colW,yOf=v=>pad.t+ph*(1-(v-yMin)/yRange);
+    const NS='http://www.w3.org/2000/svg';
+    function se(tag,attrs){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e;}
+    function st(p,x,y,t,a){const el=se('text',{x,y,...a});el.textContent=t;p.appendChild(el);}
+    niceGrid(yMin,yMax,500).forEach(v=>{const y=yOf(v);svg.appendChild(se('line',{x1:pad.l,y1:y,x2:W-pad.r,y2:y,stroke:'#2a2a2a','stroke-width':1}));st(svg,pad.l-6,y+4,(v/1000).toFixed(0)+'K',{'text-anchor':'end',fill:'#6b7280','font-size':10,'font-family':'-apple-system,Inter,sans-serif'});});
+    svg.appendChild(se('line',{x1:pad.l,y1:yBot,x2:W-pad.r,y2:yBot,stroke:'#333','stroke-width':1}));
+    const bars=[];target.forEach((v,i)=>{const bh=yBot-yOf(v),bx=xOf(i)-barW/2,by=yOf(v),rect=se('rect',{x:bx,y:by+bh,width:barW,height:0,rx:3,fill:'rgba(156,163,175,.30)'});svg.appendChild(rect);bars.push({rect,bh,by});});
+    svg.appendChild(se('polyline',{points:lastYear.map((v,i)=>`${xOf(i)},${yOf(v)}`).join(' '),fill:'none',stroke:'#fbbf24','stroke-width':2,'stroke-dasharray':'5,3','stroke-linecap':'round'}));
+    const acLine=se('polyline',{points:actual.map((v,i)=>`${xOf(i)},${yOf(v)}`).join(' '),fill:'none',stroke:'#34d399','stroke-width':2.5,'stroke-linecap':'round','stroke-linejoin':'round'});
+    svg.appendChild(acLine);
+    if(!reduceMotion){const ll=acLine.getTotalLength();acLine.style.strokeDasharray=ll;acLine.style.strokeDashoffset=ll;setTimeout(()=>{acLine.style.transition='stroke-dashoffset 1.3s ease-out';acLine.style.strokeDashoffset=0;},350);}
+    const tip=$('tip'),srLive=$('sr-live'),tMonth=$('tip-month'),tTarget=$('tip-target'),tActual=$('tip-actual'),tLY=$('tip-ly');
+    actual.forEach((v,i)=>{
+      const cx2=xOf(i),cy2=yOf(v),ariaLabel=`${months[i]}: 目標¥${target[i].toLocaleString()}万、実績¥${v.toLocaleString()}万、昨年¥${lastYear[i].toLocaleString()}万`;
+      const hit=se('rect',{x:cx2-colW/2,y:pad.t,width:colW,height:ph,fill:'transparent',tabindex:'0',role:'button','aria-label':ariaLabel,class:'focusable',style:'cursor:pointer'});svg.appendChild(hit);
+      const dot=se('circle',{cx:cx2,cy:cy2,r:5,fill:'#34d399',stroke:'#111','stroke-width':2,style:'transition:r .15s','aria-hidden':'true'});svg.appendChild(dot);
+      function showTip(){dot.setAttribute('r',7);if(tMonth)tMonth.textContent=months[i];if(tTarget)tTarget.textContent=`¥${target[i].toLocaleString()}万`;if(tActual)tActual.textContent=`¥${v.toLocaleString()}万`;if(tLY)tLY.textContent=`¥${lastYear[i].toLocaleString()}万`;if(tip)tip.classList.add('visible');if(srLive)srLive.textContent=ariaLabel;}
+      function hideTip(){dot.setAttribute('r',5);if(tip)tip.classList.remove('visible');}
+      hit.addEventListener('mouseenter',showTip);hit.addEventListener('mousemove',e=>tip&&placeTip(tip,e.clientX,e.clientY));hit.addEventListener('mouseleave',hideTip);hit.addEventListener('focus',()=>{showTip();tip&&placeTip(tip,cx2,cy2);});hit.addEventListener('blur',hideTip);hit.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')showTip();});
+    });
+    months.forEach((m,i)=>st(svg,xOf(i),H-6,m,{'text-anchor':'middle',fill:'#6b7280','font-size':11,'font-family':'-apple-system,Inter,sans-serif','aria-hidden':'true'}));
+    bars.forEach(({rect,bh,by},i)=>{if(reduceMotion){rect.setAttribute('height',bh);rect.setAttribute('y',by);return;}setTimeout(()=>{const t0=performance.now(),dur=650;(function frame(now){const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,3);rect.setAttribute('height',bh*e);rect.setAttribute('y',by+bh*(1-e));if(p<1)requestAnimationFrame(frame);})(performance.now());},150+i*55);});
+  }
+
+  function renderCustomers() {
+    const container=$('customer-list'); if(!container)return;
+    const {customers}=DATA,maxAmt=Math.max(...customers.map(c=>c.amountMan));
+    const RS=[{bg:'linear-gradient(135deg,#fbbf24,#d97706)',fg:'#1c0f00'},{bg:'linear-gradient(135deg,#94a3b8,#64748b)',fg:'#0f1623'},{bg:'linear-gradient(135deg,#cd7f32,#92400e)',fg:'#fff7ed'}];
+    const BG=['from-[#e5e7eb] to-[#9ca3af]','from-[#9ca3af] to-[#6b7280]','from-[#6b7280] to-[#4b5563]','from-[#374151] to-[#2a2a2a]'];
+    container.innerHTML=customers.map((c,i)=>{
+      const rs=RS[i],bg=BG[i]||BG[BG.length-1],pct=((c.amountMan/maxAmt)*100).toFixed(1),pos=c.prevDiffMan>=0;
+      const diffTxt=pos?`+¥${(c.prevDiffMan*10000).toLocaleString()}`:`−¥${(Math.abs(c.prevDiffMan)*10000).toLocaleString()}`;
+      const bc=pos?'bg-emerald-400/[.12] text-emerald-400':'bg-rose-400/[.12] text-rose-400';
+      const border=i===0?'':'border-t border-white/[.05]';
+      const badge=rs?`<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0" style="background:${rs.bg};color:${rs.fg}">${i+1}</div>`:`<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0 text-gray-400 border border-white/[.09]">${i+1}</div>`;
+      return `<div class="row-in grid grid-cols-[36px_1fr_auto] items-center gap-3.5 py-3 px-1.5 rounded-xl hover:bg-white/[.04] hover:translate-x-1 transition-all duration-150 cursor-default ${border}" style="animation-delay:${(.10+i*.08).toFixed(2)}s" role="listitem">${badge}<div class="flex flex-col gap-1.5 min-w-0"><span class="text-[.88rem] font-semibold truncate">${c.name}</span><div class="h-1 bg-white/[.07] rounded-full overflow-hidden"><div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms] bg-gradient-to-r ${bg}" data-w="${pct}"></div></div></div><div class="flex flex-col items-end gap-1 shrink-0"><span class="text-[1.05rem] font-bold tracking-tight">¥${(c.amountMan*10000).toLocaleString()}</span><span class="text-[.7rem] font-bold px-2 py-0.5 rounded-full ${bc}">前月比 ${diffTxt}</span></div></div>`;
+    }).join('');
+    requestAnimationFrame(()=>container.querySelectorAll('.bar-fill').forEach((bar,i)=>{if(reduceMotion){bar.style.width=bar.dataset.w+'%';return;}setTimeout(()=>{bar.style.width=bar.dataset.w+'%';},400+i*80);}));
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    renderKPIs(); renderCustomers(); initGauge(); buildChart();
+  });
+})();
+</script>
+</body>
+</html>

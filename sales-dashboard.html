@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売上進捗ダッシュボード</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Noto Sans JP', sans-serif; }
+
+  /* ── Entrance animations ─────────────────────────────── */
+  @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes rowIn  { to   { opacity:1; transform:translateX(0); } }
+
+  /* ── Gradient border (padding-box / border-box trick) ── */
+  .gb {
+    background:
+      linear-gradient(#1a1a1a, #1a1a1a) padding-box,
+      linear-gradient(135deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.05) 45%, rgba(255,255,255,.10) 100%) border-box;
+    border: 1px solid transparent;
+  }
+
+  /* ── Row entrance ────────────────────────────────────── */
+  .row-in { opacity:0; transform:translateX(-10px); animation:rowIn .4s ease-out forwards; }
+
+  /* ── Accessible focus ring ───────────────────────────── */
+  .focusable:focus-visible {
+    outline: 2px solid rgba(255,255,255,.6);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* ── SVG tooltip ─────────────────────────────────────── */
+  .tip { position:fixed; pointer-events:none; opacity:0; transition:opacity .15s; z-index:100; }
+  .tip.visible { opacity:1; }
+
+  /* ── Screen-reader only ──────────────────────────────── */
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  /* ── Reduced motion ──────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+
+<body class="min-h-screen bg-[#111111] text-[#f0f0f0] px-7 pt-8 pb-14"
+      style="opacity:0;animation:pageIn .5s ease-out .05s forwards">
+
+<div class="max-w-[920px] mx-auto">
+
+  <!-- ── Header ───────────────────────────────────────── -->
+  <header class="flex justify-between items-start mb-7 pb-5 border-b border-white/[.08]">
+    <div>
+      <h1 class="text-[2rem] font-extrabold tracking-tight
+                 bg-gradient-to-br from-white via-gray-300 to-gray-400
+                 bg-clip-text text-transparent">
+        売上進捗ダッシュボード
+      </h1>
+      <p class="mt-1 text-sm text-gray-500" id="hd-period">—</p>
+    </div>
+    <div class="mt-0.5 px-3.5 py-1.5 rounded-lg text-xs text-gray-500
+                bg-white/[.04] border border-white/[.08] whitespace-nowrap"
+         id="hd-updated">—</div>
+  </header>
+
+  <!-- ════ 今月 ════ -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">今月</p>
+    <div class="flex flex-wrap gap-2.5">
+
+      <!-- 売上実績 ★ -->
+      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)]
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">売上実績</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-month-actual">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-target-sub">—</p>
+      </div>
+
+      <!-- 目標対比 -->
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">目標対比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+      </div>
+
+      <!-- 昨年比 -->
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">昨年比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-yoy-sub">—</p>
+      </div>
+    </div>
+
+    <!-- 当月達成率バー -->
+    <div class="mt-4 flex items-center gap-2.5">
+      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
+        <div id="prog-month"
+             class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
+        </div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold whitespace-nowrap" id="prog-month-label">—</span>
+        <span class="text-[10px] text-gray-600">当月目標達成率</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 上半期 ════ -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">上半期（4〜9月）</p>
+
+    <!-- KPIs -->
+    <div class="flex flex-wrap gap-2.5 mb-5">
+      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)]
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">半期実績</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-half-actual">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-half-target-sub">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">半期目標比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-half-vs-target">—</p>
+      </div>
+    </div>
+
+    <!-- グラフ -->
+    <div class="flex flex-wrap gap-3">
+
+      <!-- 月次推移 -->
+      <div class="flex-[3_1_320px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4">
+        <p class="text-xs font-semibold text-gray-500 mb-2">月次推移</p>
+        <div class="flex gap-3.5 mb-2">
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500">
+            <span class="inline-block w-3 h-2.5 rounded-sm bg-gray-400/50"></span>目標
+          </span>
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500">
+            <span class="inline-block w-4 border-t-2 border-emerald-400"></span>実績
+          </span>
+          <span class="flex items-center gap-1.5 text-[.7rem] text-gray-500">
+            <span class="inline-block w-4 border-t-2 border-dashed border-amber-400"></span>昨年
+          </span>
+        </div>
+        <svg id="trend" role="img" viewBox="0 0 540 195" width="100%"
+             preserveAspectRatio="xMidYMid meet"
+             style="display:block;overflow:visible">
+          <title>上半期の月次売上推移グラフ</title>
+        </svg>
+      </div>
+
+      <!-- 達成メーター -->
+      <div class="flex-[1_1_175px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  flex flex-col items-center">
+        <p class="self-start text-xs font-semibold text-gray-500 mb-1">半期累積 達成メーター</p>
+        <div class="w-full flex justify-center my-1.5">
+          <svg id="gauge" role="img" viewBox="0 0 220 118" width="100%"
+               style="max-width:240px;overflow:visible">
+            <title>半期目標達成率メーター</title>
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path id="g-track" fill="none" stroke="#2a2a2a" stroke-width="13" stroke-linecap="round"/>
+            <path id="g-glow"  fill="none" stroke-width="18" stroke-linecap="round" opacity=".25" filter="url(#glow)"/>
+            <path id="g-value" fill="none" stroke-width="13" stroke-linecap="round"/>
+            <text id="g-pct" x="110" y="84" text-anchor="middle"
+                  fill="#f0f0f0" font-size="24" font-weight="800"
+                  font-family="-apple-system,Inter,sans-serif">—</text>
+            <text id="g-sub" x="110" y="101" text-anchor="middle"
+                  fill="#6b7280" font-size="10"
+                  font-family="-apple-system,Inter,sans-serif">—</text>
+            <text x="34"  y="115" text-anchor="middle" fill="#6b7280" font-size="9"
+                  font-family="-apple-system,Inter,sans-serif">0%</text>
+            <text x="186" y="115" text-anchor="middle" fill="#6b7280" font-size="9"
+                  font-family="-apple-system,Inter,sans-serif">100%</text>
+          </svg>
+        </div>
+        <div class="w-full space-y-1.5 mt-1" id="gauge-stats"></div>
+        <p class="self-start text-[10px] text-gray-600 mt-2">半期目標達成率</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 件数 ════ -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">件数</p>
+    <div class="flex flex-wrap gap-2.5 justify-start">
+      <div class="flex-[2_1_155px] max-w-xs bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">今月件数</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-deal-count">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-deal-prev-sub">—</p>
+      </div>
+      <div class="flex-1 min-w-[110px] max-w-[180px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">前月比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-deal-mom">—</p>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center gap-2.5">
+      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
+        <div id="prog-count"
+             class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
+        </div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold whitespace-nowrap" id="prog-count-label">—</span>
+        <span class="text-[10px] text-gray-600">前月比</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 顧客別売上 ════ -->
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">顧客別売上（今月）</p>
+    <div class="flex flex-col" id="customer-list" aria-label="顧客別売上ランキング"></div>
+  </section>
+
+</div>
+
+<!-- SVG Tooltip -->
+<div class="tip bg-[rgba(10,10,10,.95)] border border-white/[.12] rounded-xl p-3 text-xs min-w-[130px]" id="tip" role="tooltip">
+  <p class="font-bold text-[#f0f0f0] mb-1.5" id="tip-month"></p>
+  <div class="flex justify-between gap-3 mt-1">
+    <span class="text-gray-500">目標</span>
+    <span class="font-semibold text-gray-300" id="tip-target"></span>
+  </div>
+  <div class="flex justify-between gap-3 mt-1">
+    <span class="text-gray-500">実績</span>
+    <span class="font-semibold text-emerald-400" id="tip-actual"></span>
+  </div>
+  <div class="flex justify-between gap-3 mt-1">
+    <span class="text-gray-500">昨年</span>
+    <span class="font-semibold text-amber-400" id="tip-ly"></span>
+  </div>
+</div>
+
+<!-- Screen-reader live region -->
+<div id="sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════
+     DATA — single source of truth
+  ══════════════════════════════════════════════════════════ */
+  const DATA = {
+    period:   { month: '2026年3月度', halfYear: '2026年3〜9月', updatedAt: '2026/03/11' },
+    month: {
+      revenueActual:    800,   // ¥8,000,000
+      revenueTarget:    900,   // ¥9,000,000
+      lastYearActual:   750,   // ¥7,500,000
+    },
+    halfYear: {
+      actual: 10_000,          // ¥100,000,000
+      target: 12_000,          // ¥120,000,000
+    },
+    deals: {
+      current:  48,
+      previous: 45,
+    },
+    monthly: {
+      months:   ['4月','5月','6月','7月','8月','9月'],
+      target:   [1800, 1900, 2000, 2100, 2000, 2200],
+      actual:   [1500, 1700, 1600, 1800, 1600, 1800],
+      lastYear: [1400, 1500, 1550, 1700, 1450, 1700],
+    },
+    customers: [
+      { name: 'AAAAAAAA', amountMan: 200, prevDiffMan: +10 },
+      { name: 'BBBBBBBB', amountMan: 180, prevDiffMan:  +5 },
+      { name: 'CCCCCCC',  amountMan: 150, prevDiffMan:  -8 },
+      { name: 'DDDDDDD',  amountMan: 120, prevDiffMan:  -3 },
+    ],
+  };
+
+  /* ══ Helpers ══════════════════════════════════════════════ */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function $(id) {
+    const el = document.getElementById(id);
+    if (!el) console.warn(`[dashboard] #${id} not found`);
+    return el;
+  }
+
+  const yen    = n => `¥${(n * 10000).toLocaleString()}`;
+  const pctStr = (a, b) => `${((a / b) * 100).toFixed(1)}%`;
+  const diffStr = (a, b) => {
+    const v = +((a / b) * 100 - 100).toFixed(1);
+    return v >= 0 ? `+${v.toFixed(1)}%` : `${v.toFixed(1)}%`;
+  };
+  const isPos = s => s.startsWith('+');
+
+  function colorFor(s) { return isPos(s) ? '#34d399' : '#fb7185'; }
+
+  function gaugeColor(ratio) {
+    if (ratio >= 0.90) return '#34d399'; // emerald — 達成圏
+    if (ratio >= 0.80) return '#fbbf24'; // amber   — 注意圏
+    return '#fb7185';                    // rose    — 未達圏
+  }
+
+  /** Y軸グリッド刻みをデータから自動生成 */
+  function niceGrid(min, max, step = 500) {
+    const rows = [];
+    for (let v = Math.ceil(min / step) * step; v <= max; v += step) rows.push(v);
+    return rows;
+  }
+
+  /** ツールチップをビューポート内にクランプ */
+  function placeTip(tip, clientX, clientY) {
+    const margin = 12;
+    const w = tip.offsetWidth  || 140;
+    const h = tip.offsetHeight || 110;
+    const x = Math.min(clientX + 16, window.innerWidth  - w - margin);
+    const y = Math.min(Math.max(clientY - 10, margin), window.innerHeight - h - margin);
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  }
+
+  function setText(id, text, color) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = text;
+    if (color) el.style.color = color;
+  }
+
+  /* ══ Render KPIs ══════════════════════════════════════════ */
+  function renderKPIs() {
+    const { month, halfYear, deals, period } = DATA;
+
+    /* ── header ── */
+    setText('hd-period',  `${period.month} / 下半期: ${period.halfYear}`);
+    setText('hd-updated', `最終更新: ${period.updatedAt}`);
+
+    /* ── 今月 ── */
+    const mVsT = diffStr(month.revenueActual, month.revenueTarget);
+    const mYoY = diffStr(month.revenueActual, month.lastYearActual);
+    setText('v-month-actual',     yen(month.revenueActual));
+    setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
+    setText('v-month-vs-target',  mVsT, colorFor(mVsT));
+    setText('v-month-yoy',        mYoY, colorFor(mYoY));
+    setText('v-month-yoy-sub',    `昨年実績: ${yen(month.lastYearActual)}`);
+
+    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
+    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
+    setText('prog-month-label', pctStr(month.revenueActual, month.revenueTarget), monthColor);
+    const pm = $('prog-month');
+    if (pm) {
+      pm.style.background = `linear-gradient(90deg, ${monthColor}99, ${monthColor})`;
+      setTimeout(() => { pm.style.width = Math.min(monthPct, 100) + '%'; }, 300);
+    }
+
+    /* ── 上半期 ── */
+    const hVsT = diffStr(halfYear.actual, halfYear.target);
+    setText('v-half-actual',     yen(halfYear.actual));
+    setText('v-half-target-sub', `目標: ${yen(halfYear.target)}`);
+    setText('v-half-vs-target',  hVsT, colorFor(hVsT));
+
+    /* ── 件数 ── */
+    const dealMoM = diffStr(deals.current, deals.previous);
+    setText('v-deal-count',    `${deals.current}件`);
+    setText('v-deal-prev-sub', `前月: ${deals.previous}件`);
+    setText('v-deal-mom',      dealMoM, colorFor(dealMoM));
+    setText('prog-count-label', dealMoM, colorFor(dealMoM));
+    const pc = $('prog-count');
+    if (pc) {
+      const dealColor = colorFor(dealMoM);
+      pc.style.background = `linear-gradient(90deg, ${dealColor}99, ${dealColor})`;
+      const dealPct = Math.min((deals.current / deals.previous) * 100, 100);
+      setTimeout(() => { pc.style.width = dealPct + '%'; }, 300);
+    }
+  }
+
+  /* ══ Gauge ════════════════════════════════════════════════ */
+  function initGauge() {
+    const track = $('g-track'), glow = $('g-glow'), value = $('g-value');
+    const pctEl = $('g-pct'),   subEl = $('g-sub'), statsEl = $('gauge-stats');
+    if (!track || !value) return;
+
+    const R = 76, cx = 110, cy = 98;
+    const d = `M ${cx - R} ${cy} A ${R} ${R} 0 1 1 ${cx + R} ${cy}`;
+    [track, glow, value].forEach(p => p.setAttribute('d', d));
+
+    const { actual, target } = DATA.halfYear;
+    const ratio = actual / target;
+    const color = gaugeColor(ratio);
+
+    glow.setAttribute('stroke', color);
+    value.setAttribute('stroke', color);
+
+    const len = track.getTotalLength();
+    const targetOffset = len * (1 - ratio);
+
+    value.style.strokeDasharray  = len;
+    value.style.strokeDashoffset = len;
+    glow.style.strokeDasharray   = len;
+    glow.style.strokeDashoffset  = len;
+
+    if (reduceMotion) {
+      value.style.strokeDashoffset = targetOffset;
+      glow.style.strokeDashoffset  = targetOffset;
+      if (pctEl) pctEl.textContent = (ratio * 100).toFixed(1) + '%';
+    } else {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const ease = 'cubic-bezier(.4,0,.15,1)';
+        value.style.transition = `stroke-dashoffset 1.7s ${ease}`;
+        glow.style.transition  = `stroke-dashoffset 1.7s ${ease}`;
+        value.style.strokeDashoffset = targetOffset;
+        glow.style.strokeDashoffset  = targetOffset;
+      }));
+      const t0 = performance.now(), dur = 1700;
+      (function tick(now) {
+        const p = Math.min((now - t0) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        if (pctEl) pctEl.textContent = (e * ratio * 100).toFixed(1) + '%';
+        if (p < 1) requestAnimationFrame(tick);
+      })(performance.now());
+    }
+
+    if (subEl) subEl.textContent = `${yen(actual)} / ${yen(target)}`;
+
+    if (statsEl) {
+      const rows = [
+        ['目標',   yen(target),         '#f0f0f0'],
+        ['実績',   yen(actual),          '#34d399'],
+        ['達成率', pctStr(actual,target), '#d1d5db'],
+        ['残額',   yen(target - actual), '#fb7185'],
+      ];
+      statsEl.innerHTML = rows.map(([k, v, c]) => `
+        <div class="flex justify-between text-xs${k !== '目標' ? ' pt-1.5 border-t border-white/[.05]' : ''}">
+          <span class="text-gray-500">${k}</span>
+          <span class="font-semibold" style="color:${c}">${v}</span>
+        </div>`).join('');
+    }
+  }
+
+  /* ══ Trend chart ══════════════════════════════════════════ */
+  function buildChart() {
+    const svg = $('trend');
+    if (!svg) return;
+
+    const { months, target, actual, lastYear } = DATA.monthly;
+    const W = 540, H = 195;
+    const pad = { t: 12, r: 16, b: 34, l: 44 };
+    const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+    const n  = months.length;
+    const allVals = [...target, ...actual, ...lastYear];
+    const rawMin  = Math.min(...allVals), rawMax = Math.max(...allVals);
+    const step    = 500;
+    const yMin    = Math.floor(rawMin / step) * step - step;
+    const yMax    = Math.ceil(rawMax  / step) * step + step;
+    const yRange  = yMax - yMin;
+    const colW    = pw / n, barW = colW * 0.42, yBot = pad.t + ph;
+
+    const xOf = i => pad.l + (i + 0.5) * colW;
+    const yOf = v => pad.t + ph * (1 - (v - yMin) / yRange);
+
+    const NS = 'http://www.w3.org/2000/svg';
+    function se(tag, attrs) {
+      const e = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      return e;
+    }
+    function st(parent, x, y, text, attrs) {
+      const t = se('text', { x, y, ...attrs });
+      t.textContent = text;
+      parent.appendChild(t);
+    }
+
+    /* Grid — auto from data range */
+    niceGrid(yMin, yMax, 500).forEach(v => {
+      const y = yOf(v);
+      svg.appendChild(se('line', { x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#2a2a2a', 'stroke-width': 1 }));
+      st(svg, pad.l - 6, y + 4, (v / 1000).toFixed(0) + 'K', {
+        'text-anchor': 'end', fill: '#6b7280', 'font-size': 10,
+        'font-family': '-apple-system,Inter,sans-serif',
+      });
+    });
+
+    svg.appendChild(se('line', { x1: pad.l, y1: yBot, x2: W - pad.r, y2: yBot, stroke: '#333', 'stroke-width': 1 }));
+
+    /* Target bars */
+    const bars = [];
+    target.forEach((v, i) => {
+      const bh = yBot - yOf(v), bx = xOf(i) - barW / 2, by = yOf(v);
+      const rect = se('rect', { x: bx, y: by + bh, width: barW, height: 0, rx: 3, fill: 'rgba(156,163,175,.30)' });
+      svg.appendChild(rect);
+      bars.push({ rect, bh, by });
+    });
+
+    /* Last year line */
+    svg.appendChild(se('polyline', {
+      points: lastYear.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' '),
+      fill: 'none', stroke: '#fbbf24', 'stroke-width': 2,
+      'stroke-dasharray': '5,3', 'stroke-linecap': 'round',
+    }));
+
+    /* Actual line */
+    const acLine = se('polyline', {
+      points: actual.map((v, i) => `${xOf(i)},${yOf(v)}`).join(' '),
+      fill: 'none', stroke: '#34d399', 'stroke-width': 2.5,
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    });
+    svg.appendChild(acLine);
+
+    if (!reduceMotion) {
+      const lineLen = acLine.getTotalLength();
+      acLine.style.strokeDasharray  = lineLen;
+      acLine.style.strokeDashoffset = lineLen;
+      setTimeout(() => {
+        acLine.style.transition = 'stroke-dashoffset 1.3s ease-out';
+        acLine.style.strokeDashoffset = 0;
+      }, 350);
+    }
+
+    /* Dots with tooltip + keyboard */
+    const tip     = $('tip');
+    const srLive  = $('sr-live');
+    const tMonth  = $('tip-month');
+    const tTarget = $('tip-target');
+    const tActual = $('tip-actual');
+    const tLY     = $('tip-ly');
+
+    actual.forEach((v, i) => {
+      const cx2 = xOf(i), cy2 = yOf(v);
+      const ariaLabel = `${months[i]}: 目標¥${target[i].toLocaleString()}万、実績¥${v.toLocaleString()}万、昨年¥${lastYear[i].toLocaleString()}万`;
+
+      const hit = se('rect', {
+        x: cx2 - colW / 2, y: pad.t, width: colW, height: ph,
+        fill: 'transparent', tabindex: '0', role: 'button',
+        'aria-label': ariaLabel, class: 'focusable',
+        style: 'cursor:pointer',
+      });
+      svg.appendChild(hit);
+
+      const dot = se('circle', {
+        cx: cx2, cy: cy2, r: 5, fill: '#34d399',
+        stroke: '#111', 'stroke-width': 2,
+        style: 'transition:r .15s', 'aria-hidden': 'true',
+      });
+      svg.appendChild(dot);
+
+      function showTip() {
+        if (!tMonth || !tTarget || !tActual || !tLY) return;
+        dot.setAttribute('r', 7);
+        tMonth.textContent  = months[i];
+        tTarget.textContent = `¥${target[i].toLocaleString()}万`;
+        tActual.textContent = `¥${v.toLocaleString()}万`;
+        tLY.textContent     = `¥${lastYear[i].toLocaleString()}万`;
+        if (tip) tip.classList.add('visible');
+        if (srLive) srLive.textContent = ariaLabel;
+      }
+      function hideTip() {
+        dot.setAttribute('r', 5);
+        if (tip) tip.classList.remove('visible');
+      }
+
+      hit.addEventListener('mouseenter', showTip);
+      hit.addEventListener('mousemove',  e => tip && placeTip(tip, e.clientX, e.clientY));
+      hit.addEventListener('mouseleave', hideTip);
+      hit.addEventListener('focus',      e => { showTip(); tip && placeTip(tip, cx2, cy2); });
+      hit.addEventListener('blur',       hideTip);
+      hit.addEventListener('keydown',    e => { if (e.key === 'Enter' || e.key === ' ') showTip(); });
+    });
+
+    /* X labels */
+    months.forEach((m, i) => {
+      st(svg, xOf(i), H - 6, m, {
+        'text-anchor': 'middle', fill: '#6b7280', 'font-size': 11,
+        'font-family': '-apple-system,Inter,sans-serif',
+        'aria-hidden': 'true',
+      });
+    });
+
+    /* Animate bars */
+    bars.forEach(({ rect, bh, by }, i) => {
+      if (reduceMotion) {
+        rect.setAttribute('height', bh);
+        rect.setAttribute('y', by);
+        return;
+      }
+      setTimeout(() => {
+        const t0 = performance.now(), dur = 650;
+        (function frame(now) {
+          const p = Math.min((now - t0) / dur, 1);
+          const e = 1 - Math.pow(1 - p, 3);
+          rect.setAttribute('height', bh * e);
+          rect.setAttribute('y', by + bh * (1 - e));
+          if (p < 1) requestAnimationFrame(frame);
+        })(performance.now());
+      }, 150 + i * 55);
+    });
+  }
+
+  /* ══ Customer list (data-driven) ══════════════════════════ */
+  function renderCustomers() {
+    const container = $('customer-list');
+    if (!container) return;
+
+    const { customers } = DATA;
+    const maxAmt = Math.max(...customers.map(c => c.amountMan));
+
+    const RANK_STYLES = [
+      { bg: 'linear-gradient(135deg,#fbbf24,#d97706)', fg: '#1c0f00' },
+      { bg: 'linear-gradient(135deg,#94a3b8,#64748b)', fg: '#0f1623' },
+      { bg: 'linear-gradient(135deg,#cd7f32,#92400e)', fg: '#fff7ed' },
+    ];
+    const BAR_GRADS = [
+      'from-[#e5e7eb] to-[#9ca3af]',
+      'from-[#9ca3af] to-[#6b7280]',
+      'from-[#6b7280] to-[#4b5563]',
+      'from-[#374151] to-[#2a2a2a]',
+    ];
+
+    container.innerHTML = customers.map((c, i) => {
+      const rank    = i + 1;
+      const rs      = RANK_STYLES[i];
+      const barGrad = BAR_GRADS[i] || BAR_GRADS[BAR_GRADS.length - 1];
+      const pct     = ((c.amountMan / maxAmt) * 100).toFixed(1);
+      const pos     = c.prevDiffMan >= 0;
+      const diffTxt = pos ? `+¥${(c.prevDiffMan * 10000).toLocaleString()}` : `−¥${(Math.abs(c.prevDiffMan) * 10000).toLocaleString()}`;
+      const badgeClr = pos ? 'bg-emerald-400/[.12] text-emerald-400' : 'bg-rose-400/[.12] text-rose-400';
+      const delay   = (.10 + i * .08).toFixed(2);
+      const border  = i === 0 ? '' : 'border-t border-white/[.05]';
+      const rankBadge = rs
+        ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0"
+                style="background:${rs.bg};color:${rs.fg}">${rank}</div>`
+        : `<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0 text-gray-400 border border-white/[.09]">${rank}</div>`;
+
+      return `
+        <div class="row-in grid grid-cols-[36px_1fr_auto] items-center gap-3.5 py-3 px-1.5 rounded-xl
+                    hover:bg-white/[.04] hover:translate-x-1 transition-all duration-150 cursor-default ${border}"
+             style="animation-delay:${delay}s"
+             role="listitem">
+          ${rankBadge}
+          <div class="flex flex-col gap-1.5 min-w-0">
+            <span class="text-[.88rem] font-semibold truncate" title="${c.name}">${c.name}</span>
+            <div class="h-1 bg-white/[.07] rounded-full overflow-hidden">
+              <div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms]
+                          bg-gradient-to-r ${barGrad}"
+                   data-w="${pct}"></div>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <span class="text-[1.05rem] font-bold tracking-tight">¥${(c.amountMan * 10000).toLocaleString()}</span>
+            <span class="text-[.7rem] font-bold px-2 py-0.5 rounded-full ${badgeClr}">前月比 ${diffTxt}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    /* Animate bars (after DOM insert) */
+    requestAnimationFrame(() => {
+      container.querySelectorAll('.bar-fill').forEach((bar, i) => {
+        if (reduceMotion) { bar.style.width = bar.dataset.w + '%'; return; }
+        setTimeout(() => { bar.style.width = bar.dataset.w + '%'; }, 400 + i * 80);
+      });
+    });
+  }
+
+  /* ══ Boot ═════════════════════════════════════════════════ */
+  window.addEventListener('DOMContentLoaded', () => {
+    renderKPIs();
+    renderCustomers();
+    initGauge();
+    buildChart();
+  });
+
+})();
+</script>
+</body>
+</html>
