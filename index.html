@@ -253,32 +253,32 @@
      DATA — single source of truth
   ══════════════════════════════════════════════════════════ */
   const DATA = {
-    period:   { month: '{{PERIOD_MONTH}}', halfYear: '{{PERIOD_HALF_YEAR}}', updatedAt: '{{UPDATED_AT}}' },
+    period:   { month: '2026年4月度', halfYear: '下半期', updatedAt: '2026/04/15' },
     month: {
-      revenueActual:    {{MONTH_ACTUAL}},
-      revenueTarget:    {{MONTH_TARGET}},
-      lastYearActual:   {{MONTH_LAST_YEAR}},
+      revenueActual:    423.40680000000003,
+      revenueTarget:    700,
+      lastYearActual:   1152.4426,
     },
     halfYear: {
-      actual: {{HALF_ACTUAL}},
-      target: {{HALF_TARGET}},
+      actual: 2327.0356,
+      target: 4900,
     },
     deals: {
-      current:  {{DEALS_CURRENT}},
-      previous: {{DEALS_PREVIOUS}},
+      current:  29,
+      previous: 159,
     },
     monthly: {
       months:   ['3月','4月','5月','6月','7月','8月'],
       target:   [1400,   700,  700,  700,  700,  700],
-      actual:   [{{MONTHLY_ACTUAL_1}}, {{MONTHLY_ACTUAL_2}},  0,    0,    0,    0],
+      actual:   [0, 423.40680000000003,  0,    0,    0,    0],
       lastYear: [1176.9, 1152.4, 1052.9, 1004.9, 912.8, 567.1],
     },
     customers: [
-      { name: '{{CUSTOMER_1_NAME}}', amountMan: {{CUSTOMER_1_AMOUNT}}, prevDiffMan: {{CUSTOMER_1_DIFF}} },
-      { name: '{{CUSTOMER_2_NAME}}', amountMan: {{CUSTOMER_2_AMOUNT}}, prevDiffMan: {{CUSTOMER_2_DIFF}} },
-      { name: '{{CUSTOMER_3_NAME}}', amountMan: {{CUSTOMER_3_AMOUNT}}, prevDiffMan: {{CUSTOMER_3_DIFF}} },
-      { name: '{{CUSTOMER_4_NAME}}', amountMan: {{CUSTOMER_4_AMOUNT}}, prevDiffMan: {{CUSTOMER_4_DIFF}} },
-      { name: '{{CUSTOMER_5_NAME}}', amountMan: {{CUSTOMER_5_AMOUNT}}, prevDiffMan: {{CUSTOMER_5_DIFF}} },
+      { name: '　Ａｌｌｉａｎｃｅ　Ｇｅｍ', amountMan: 206.83, prevDiffMan: 164.07000000000002 },
+      { name: '　Graceful Future Jewelry Limited', amountMan: 15.9091, prevDiffMan: -14.8909 },
+      { name: '　Ｙ Ｋｎｏｔ Ｌｉｍｉｔｅｄ', amountMan: 6.248, prevDiffMan: -1.7007 },
+      { name: '　海外（専用伝発行用）', amountMan: 3.5, prevDiffMan: -869.8672 },
+      { name: '　In-Nihon　K.K', amountMan: 0.35000000000000003, prevDiffMan: 0.35000000000000003 },
     ],
   };
 
