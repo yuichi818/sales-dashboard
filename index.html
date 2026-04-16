@@ -41,6 +41,38 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
   }
+
+  /* ── Light mode overrides ─────────────────────────────── */
+  @media (prefers-color-scheme: light) {
+    body { background: #f0f2f5 !important; color: #1a1a1a !important; }
+
+    h1 { background-image: linear-gradient(135deg, #111111, #374151, #4b5563) !important; }
+
+    .gb {
+      background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        linear-gradient(135deg, rgba(0,0,0,.12) 0%, rgba(0,0,0,.04) 45%, rgba(0,0,0,.08) 100%) border-box !important;
+    }
+
+    header                          { border-color: rgba(0,0,0,.09) !important; }
+    .bg-white\/\[\.04\]             { background-color: rgba(0,0,0,.04) !important; }
+    .bg-white\/\[\.07\]             { background-color: rgba(0,0,0,.06) !important; }
+    .from-white\/\[\.07\]           { --tw-gradient-from: rgba(0,0,0,.06) var(--tw-gradient-from-position) !important; }
+    .to-white\/\[\.02\]             { --tw-gradient-to:   rgba(0,0,0,.02) var(--tw-gradient-to-position)   !important; }
+    .border-white\/\[\.08\]         { border-color: rgba(0,0,0,.09) !important; }
+    .border-white\/\[\.16\]         { border-color: rgba(0,0,0,.18) !important; }
+    .border-white\/\[\.05\]         { border-color: rgba(0,0,0,.06) !important; }
+    .border-white\/\[\.09\]         { border-color: rgba(0,0,0,.10) !important; }
+    .text-gray-200                  { color: #374151 !important; }
+    .hover\:bg-white\/\[\.04\]:hover { background-color: rgba(0,0,0,.04) !important; }
+    .focusable:focus-visible        { outline-color: rgba(0,0,0,.5) !important; }
+
+    .tip { background: rgba(255,255,255,.98) !important; border-color: rgba(0,0,0,.12) !important; }
+    #tip-month { color: #1a1a1a !important; }
+
+    #g-track { stroke: #e5e7eb !important; }
+    #g-pct   { fill: #1a1a1a !important; }
+  }
 </style>
 </head>
 
@@ -269,16 +301,16 @@
     },
     monthly: {
       months:   ['3月','4月','5月','6月','7月','8月'],
-      target:   [1400,   700,  700,  700,  700,  700],
-      actual:   [1903.6288, 858.8299,  0,    0,    0,    0],
-      lastYear: [1176.9, 1152.4, 1052.9, 1004.9, 912.8, 567.1],
+      target:   [1400, 700, 700, 700, 700, 700],
+      actual:   [1903.6288, 858.8299, 0, 0, 0, 0],
+      lastYear: [1176.9998, 1152.4426, 1052.9346, 1004.9134, 912.8346, 567.1432],
     },
     customers: [
-      { name: '＊ＯＲＩＥＮＴ４Ｃ'ｓ ＨＫ', amountMan: 209.2731, prevDiffMan: -702.5397 },
-      { name: '　Ａｌｌｉａｎｃｅ　Ｇｅｍ', amountMan: 206.83, prevDiffMan: 164.07000000000002 },
-      { name: '　世佳㈱', amountMan: 43.6, prevDiffMan: 43.6 },
-      { name: '　Wedding　Code', amountMan: 18.900000000000002, prevDiffMan: -1.6 },
-      { name: '　Graceful Future Jewelry Limited', amountMan: 15.9091, prevDiffMan: -14.8909 },
+      { name: "＊ＯＲＩＥＮＴ４Ｃ'ｓ ＨＫ", amountMan: 209.2731, prevDiffMan: -702.5397 },
+      { name: "　Ａｌｌｉａｎｃｅ　Ｇｅｍ", amountMan: 206.83, prevDiffMan: 164.07000000000002 },
+      { name: "　世佳㈱", amountMan: 43.6, prevDiffMan: 43.6 },
+      { name: "　Wedding　Code", amountMan: 18.900000000000002, prevDiffMan: -1.6 },
+      { name: "　Graceful Future Jewelry Limited", amountMan: 15.9091, prevDiffMan: -14.8909 },
     ],
   };
 
@@ -463,6 +495,10 @@
     const xOf = i => pad.l + (i + 0.5) * colW;
     const yOf = v => pad.t + ph * (1 - (v - yMin) / yRange);
 
+    const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    const gridColor = isLight ? '#d1d5db' : '#2a2a2a';
+    const axisColor = isLight ? '#9ca3af' : '#333333';
+
     const NS = 'http://www.w3.org/2000/svg';
     function se(tag, attrs) {
       const e = document.createElementNS(NS, tag);
@@ -478,14 +514,14 @@
     /* Grid — auto from data range */
     niceGrid(yMin, yMax, 500).forEach(v => {
       const y = yOf(v);
-      svg.appendChild(se('line', { x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#2a2a2a', 'stroke-width': 1 }));
+      svg.appendChild(se('line', { x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: gridColor, 'stroke-width': 1 }));
       st(svg, pad.l - 6, y + 4, (v / 1000).toFixed(0) + 'K', {
         'text-anchor': 'end', fill: '#6b7280', 'font-size': 10,
         'font-family': '-apple-system,Inter,sans-serif',
       });
     });
 
-    svg.appendChild(se('line', { x1: pad.l, y1: yBot, x2: W - pad.r, y2: yBot, stroke: '#333', 'stroke-width': 1 }));
+    svg.appendChild(se('line', { x1: pad.l, y1: yBot, x2: W - pad.r, y2: yBot, stroke: axisColor, 'stroke-width': 1 }));
 
     /* Target bars */
     const bars = [];
