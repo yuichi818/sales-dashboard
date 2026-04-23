@@ -708,30 +708,56 @@
     if (!container) return;
 
     const { customers } = DATA;
-    const maxAmt = Math.max(...customers.map(c => c.amountMan));
+
+    // 構成比はグランドトータル基準（全顧客合計 = 100%）
+    const totalAmt = customers.reduce((s, c) => s + c.amountMan, 0);
+
+    // 集中度インサイト
+    const top1Pct = (customers[0].amountMan / totalAmt * 100).toFixed(1);
+    const top2Pct = customers.length >= 2
+      ? ((customers[0].amountMan + customers[1].amountMan) / totalAmt * 100).toFixed(1)
+      : top1Pct;
 
     const RANK_STYLES = [
       { bg: 'linear-gradient(135deg,#fbbf24,#d97706)', fg: '#1c0f00' },
       { bg: 'linear-gradient(135deg,#94a3b8,#64748b)', fg: '#0f1623' },
       { bg: 'linear-gradient(135deg,#cd7f32,#92400e)', fg: '#fff7ed' },
     ];
-    const BAR_GRADS = [
-      'from-[#e5e7eb] to-[#9ca3af]',
-      'from-[#9ca3af] to-[#6b7280]',
-      'from-[#6b7280] to-[#4b5563]',
-      'from-[#374151] to-[#2a2a2a]',
-    ];
+    const BAR_COLORS = ['#e5e7eb', '#9ca3af', '#6b7280', '#4b5563', '#374151'];
 
-    container.innerHTML = customers.map((c, i) => {
-      const rank    = i + 1;
-      const rs      = RANK_STYLES[i];
-      const barGrad = BAR_GRADS[i] || BAR_GRADS[BAR_GRADS.length - 1];
-      const pct     = ((c.amountMan / maxAmt) * 100).toFixed(1);
-      const pos     = c.prevDiffMan >= 0;
-      const diffTxt = pos ? `+¥${(c.prevDiffMan * 10000).toLocaleString()}` : `−¥${(Math.abs(c.prevDiffMan) * 10000).toLocaleString()}`;
+    // 万円を短く表示するヘルパー
+    const yenM = n => Math.abs(n) >= 1
+      ? `¥${Math.abs(n).toFixed(1)}万`
+      : `¥${(Math.abs(n) * 10000).toLocaleString()}`;
+
+    const insightHtml = `
+      <div class="mb-3 px-1.5 flex items-center gap-2 text-[.7rem] text-gray-500 flex-wrap">
+        <span>上位1社 <span class="font-semibold text-gray-300">${top1Pct}%</span></span>
+        <span class="text-white/[.15]">·</span>
+        <span>上位2社 <span class="font-semibold text-gray-300">${top2Pct}%</span> を占有</span>
+        <span class="ml-auto text-gray-600">← 構成比</span>
+      </div>`;
+
+    container.innerHTML = insightHtml + customers.map((c, i) => {
+      const rank     = i + 1;
+      const rs       = RANK_STYLES[i];
+      const barColor = BAR_COLORS[i] || BAR_COLORS[BAR_COLORS.length - 1];
+
+      // 構成比（全体合計基準）
+      const sharePct = (c.amountMan / totalAmt * 100).toFixed(1);
+
+      // 前月比: % と 万円額を両方
+      const pos      = c.prevDiffMan >= 0;
+      const prevAmt  = c.amountMan - c.prevDiffMan;
+      const diffPct  = prevAmt > 0.001
+        ? `${pos ? '+' : ''}${((c.prevDiffMan / prevAmt) * 100).toFixed(0)}%`
+        : null;
+      const diffAmt  = `${pos ? '+' : '−'}${yenM(c.prevDiffMan)}`;
+      const badgeTxt = diffPct ? `前月比 ${diffPct} (${diffAmt})` : `前月比 ${diffAmt}`;
       const badgeClr = pos ? 'bg-emerald-400/[.12] text-emerald-400' : 'bg-rose-400/[.12] text-rose-400';
-      const delay   = (.10 + i * .08).toFixed(2);
-      const border  = i === 0 ? '' : 'border-t border-white/[.05]';
+
+      const delay     = (.10 + i * .08).toFixed(2);
+      const border    = i === 0 ? '' : 'border-t border-white/[.05]';
       const rankBadge = rs
         ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0"
                 style="background:${rs.bg};color:${rs.fg}">${rank}</div>`
@@ -744,21 +770,24 @@
              role="listitem">
           ${rankBadge}
           <div class="flex flex-col gap-1.5 min-w-0">
-            <span class="text-[.88rem] font-semibold truncate" title="${c.name}">${c.name}</span>
-            <div class="h-1 bg-white/[.07] rounded-full overflow-hidden">
-              <div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms]
-                          bg-gradient-to-r ${barGrad}"
-                   data-w="${pct}"></div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-[.88rem] font-semibold truncate" title="${c.name}">${c.name}</span>
+              <span class="text-[.65rem] text-gray-500 shrink-0">${sharePct}%</span>
+            </div>
+            <div class="h-1.5 bg-white/[.07] rounded-full overflow-hidden">
+              <div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms]"
+                   style="background:${barColor}"
+                   data-w="${sharePct}"></div>
             </div>
           </div>
           <div class="flex flex-col items-end gap-1 shrink-0">
             <span class="text-[1.05rem] font-bold tracking-tight">¥${(c.amountMan * 10000).toLocaleString()}</span>
-            <span class="text-[.7rem] font-bold px-2 py-0.5 rounded-full ${badgeClr}">前月比 ${diffTxt}</span>
+            <span class="text-[.68rem] font-bold px-2 py-0.5 rounded-full ${badgeClr}">${badgeTxt}</span>
           </div>
         </div>`;
     }).join('');
 
-    /* Animate bars (after DOM insert) */
+    /* Animate bars */
     requestAnimationFrame(() => {
       container.querySelectorAll('.bar-fill').forEach((bar, i) => {
         if (reduceMotion) { bar.style.width = bar.dataset.w + '%'; return; }
