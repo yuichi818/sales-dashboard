@@ -72,6 +72,8 @@
 
     #g-track { stroke: #e5e7eb !important; }
     #g-pct   { fill: #1a1a1a !important; }
+
+    #v-month-achievement { color: inherit !important; }
   }
 </style>
 </head>
@@ -97,45 +99,47 @@
   </header>
 
   <!-- ════ 今月 ════ -->
-  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
-    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">今月</p>
-    <div class="flex flex-wrap gap-2.5">
+  <section id="section-month" class="gb relative rounded-[22px] p-5 mb-3.5 backdrop-blur-sm overflow-hidden">
 
-      <!-- 売上実績 ★ -->
-      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
-                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)]
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">売上実績</p>
-        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-month-actual">—</p>
-        <p class="mt-1.5 text-xs text-gray-500" id="v-month-target-sub">—</p>
+    <!-- カラーステータスバー (左端) -->
+    <div id="month-status-bar"
+         class="absolute inset-y-0 left-0 w-[4px] rounded-l-[22px] transition-all duration-700"></div>
+
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-4">今月</p>
+
+    <!-- ── Hero: 当月目標達成率 ── -->
+    <div class="flex items-end gap-4 mb-4">
+      <div>
+        <p class="text-[.65rem] font-semibold tracking-[.1em] uppercase text-gray-500 mb-2">当月目標達成率</p>
+        <p class="text-[3.6rem] font-extrabold leading-none tracking-tight" id="v-month-achievement">—</p>
       </div>
-
-      <!-- 目標対比 -->
-      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">目標対比</p>
-        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
-      </div>
-
-      <!-- 昨年比 -->
-      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">昨年比</p>
-        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
-        <p class="mt-1.5 text-xs text-gray-500" id="v-month-yoy-sub">—</p>
+      <div class="pb-2 flex flex-col gap-1">
+        <p class="text-[1rem] font-bold text-gray-200" id="v-month-actual">—</p>
+        <p class="text-xs text-gray-500" id="v-month-target-sub">—</p>
+        <p class="text-[.72rem] font-semibold text-gray-500" id="v-month-remaining">—</p>
       </div>
     </div>
 
-    <!-- 当月達成率バー -->
-    <div class="mt-4 flex items-center gap-2.5">
-      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
-        <div id="prog-month"
-             class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
-        </div>
+    <!-- プログレスバー (太く・目立つ) -->
+    <div class="mb-5 h-[8px] bg-white/[.07] rounded-full overflow-hidden">
+      <div id="prog-month"
+           class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
       </div>
-      <div class="flex flex-col items-end">
-        <span class="text-xs font-bold whitespace-nowrap" id="prog-month-label">—</span>
-        <span class="text-[10px] text-gray-600">当月目標達成率</span>
+    </div>
+    <span class="sr-only" id="prog-month-label">—</span>
+
+    <!-- ── セカンダリ KPI ── -->
+    <div class="flex flex-wrap gap-2">
+      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">目標対比</p>
+        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+      </div>
+      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">昨年比</p>
+        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
+        <p class="mt-1 text-[.65rem] text-gray-600" id="v-month-yoy-sub">—</p>
       </div>
     </div>
   </section>
@@ -375,19 +379,42 @@
     /* ── 今月 ── */
     const mVsT = diffStr(month.revenueActual, month.revenueTarget);
     const mYoY = diffStr(month.revenueActual, month.lastYearActual);
+
+    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
+    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
+
+    // Hero: 当月目標達成率
+    setText('v-month-achievement', pctStr(month.revenueActual, month.revenueTarget), monthColor);
+
+    // 売上実績・目標（サブ表示）
     setText('v-month-actual',     yen(month.revenueActual));
     setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
+
+    // 残額インサイト
+    const remainingMan = month.revenueTarget - month.revenueActual;
+    setText('v-month-remaining',
+      remainingMan > 0
+        ? `目標まで残り ${yen(remainingMan)}`
+        : '目標達成！');
+
+    // セカンダリ KPI
     setText('v-month-vs-target',  mVsT, colorFor(mVsT));
     setText('v-month-yoy',        mYoY, colorFor(mYoY));
     setText('v-month-yoy-sub',    `昨年実績: ${yen(month.lastYearActual)}`);
 
-    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
-    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
+    // プログレスバー
     setText('prog-month-label', pctStr(month.revenueActual, month.revenueTarget), monthColor);
     const pm = $('prog-month');
     if (pm) {
-      pm.style.background = `linear-gradient(90deg, ${monthColor}99, ${monthColor})`;
+      pm.style.background = `linear-gradient(90deg, ${monthColor}66, ${monthColor})`;
       setTimeout(() => { pm.style.width = Math.min(monthPct, 100) + '%'; }, 300);
+    }
+
+    // カラーステータスバー（左端）
+    const statusBar = document.getElementById('month-status-bar');
+    if (statusBar) {
+      statusBar.style.background = monthColor;
+      statusBar.style.boxShadow  = `0 0 14px ${monthColor}99`;
     }
 
     /* ── 上半期 ── */
