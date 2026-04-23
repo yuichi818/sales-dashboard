@@ -41,6 +41,40 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
   }
+
+  /* ── Light mode overrides ─────────────────────────────── */
+  @media (prefers-color-scheme: light) {
+    body { background: #f0f2f5 !important; color: #1a1a1a !important; }
+
+    h1 { background-image: linear-gradient(135deg, #111111, #374151, #4b5563) !important; }
+
+    .gb {
+      background:
+        linear-gradient(#ffffff, #ffffff) padding-box,
+        linear-gradient(135deg, rgba(0,0,0,.12) 0%, rgba(0,0,0,.04) 45%, rgba(0,0,0,.08) 100%) border-box !important;
+    }
+
+    header                          { border-color: rgba(0,0,0,.09) !important; }
+    .bg-white\/\[\.04\]             { background-color: rgba(0,0,0,.04) !important; }
+    .bg-white\/\[\.07\]             { background-color: rgba(0,0,0,.06) !important; }
+    .from-white\/\[\.07\]           { --tw-gradient-from: rgba(0,0,0,.06) var(--tw-gradient-from-position) !important; }
+    .to-white\/\[\.02\]             { --tw-gradient-to:   rgba(0,0,0,.02) var(--tw-gradient-to-position)   !important; }
+    .border-white\/\[\.08\]         { border-color: rgba(0,0,0,.09) !important; }
+    .border-white\/\[\.16\]         { border-color: rgba(0,0,0,.18) !important; }
+    .border-white\/\[\.05\]         { border-color: rgba(0,0,0,.06) !important; }
+    .border-white\/\[\.09\]         { border-color: rgba(0,0,0,.10) !important; }
+    .text-gray-200                  { color: #374151 !important; }
+    .hover\:bg-white\/\[\.04\]:hover { background-color: rgba(0,0,0,.04) !important; }
+    .focusable:focus-visible        { outline-color: rgba(0,0,0,.5) !important; }
+
+    .tip { background: rgba(255,255,255,.98) !important; border-color: rgba(0,0,0,.12) !important; }
+    #tip-month { color: #1a1a1a !important; }
+
+    #g-track { stroke: #e5e7eb !important; }
+    #g-pct   { fill: #1a1a1a !important; }
+
+    #v-month-achievement { color: inherit !important; }
+  }
 </style>
 </head>
 
@@ -65,45 +99,47 @@
   </header>
 
   <!-- ════ 今月 ════ -->
-  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
-    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">今月</p>
-    <div class="flex flex-wrap gap-2.5">
+  <section id="section-month" class="gb relative rounded-[22px] p-5 mb-3.5 backdrop-blur-sm overflow-hidden">
 
-      <!-- 売上実績 ★ -->
-      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
-                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)]
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">売上実績</p>
-        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-month-actual">—</p>
-        <p class="mt-1.5 text-xs text-gray-500" id="v-month-target-sub">—</p>
+    <!-- カラーステータスバー (左端) -->
+    <div id="month-status-bar"
+         class="absolute inset-y-0 left-0 w-[4px] rounded-l-[22px] transition-all duration-700"></div>
+
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-4">今月</p>
+
+    <!-- ── Hero: 当月目標達成率 ── -->
+    <div class="flex items-end gap-4 mb-4">
+      <div>
+        <p class="text-[.65rem] font-semibold tracking-[.1em] uppercase text-gray-500 mb-2">当月目標達成率</p>
+        <p class="text-[3.6rem] font-extrabold leading-none tracking-tight" id="v-month-achievement">—</p>
       </div>
-
-      <!-- 目標対比 -->
-      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">目標対比</p>
-        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
-      </div>
-
-      <!-- 昨年比 -->
-      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
-                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">昨年比</p>
-        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
-        <p class="mt-1.5 text-xs text-gray-500" id="v-month-yoy-sub">—</p>
+      <div class="pb-2 flex flex-col gap-1">
+        <p class="text-[1rem] font-bold text-gray-200" id="v-month-actual">—</p>
+        <p class="text-xs text-gray-500" id="v-month-target-sub">—</p>
+        <p class="text-[.72rem] font-semibold text-gray-500" id="v-month-remaining">—</p>
       </div>
     </div>
 
-    <!-- 当月達成率バー -->
-    <div class="mt-4 flex items-center gap-2.5">
-      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
-        <div id="prog-month"
-             class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
-        </div>
+    <!-- プログレスバー (太く・目立つ) -->
+    <div class="mb-5 h-[8px] bg-white/[.07] rounded-full overflow-hidden">
+      <div id="prog-month"
+           class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
       </div>
-      <div class="flex flex-col items-end">
-        <span class="text-xs font-bold whitespace-nowrap" id="prog-month-label">—</span>
-        <span class="text-[10px] text-gray-600">当月目標達成率</span>
+    </div>
+    <span class="sr-only" id="prog-month-label">—</span>
+
+    <!-- ── セカンダリ KPI ── -->
+    <div class="flex flex-wrap gap-2">
+      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">目標対比</p>
+        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+      </div>
+      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">昨年比</p>
+        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
+        <p class="mt-1 text-[.65rem] text-gray-600" id="v-month-yoy-sub">—</p>
       </div>
     </div>
   </section>
@@ -274,11 +310,11 @@
       lastYear: [1176.9, 1152.4, 1052.9, 1004.9, 912.8, 567.1],
     },
     customers: [
-      { name: 'Allie',      amountMan: 206.83, prevDiffMan: +164.07 },
-      { name: 'Graceful',   amountMan:  15.91, prevDiffMan:  -14.91 },
-      { name: 'Y Knc',      amountMan:   6.25, prevDiffMan:   -1.70 },
-      { name: '海外（専）',  amountMan:   3.50, prevDiffMan: -869.87 },
-      { name: 'In-Nihor',   amountMan:   0.35, prevDiffMan:   +0.35 },
+      { name: "Allie",      amountMan: 206.83, prevDiffMan: +164.07 },
+      { name: "Graceful",   amountMan:  15.91, prevDiffMan:  -14.91 },
+      { name: "Y Knc",      amountMan:   6.25, prevDiffMan:   -1.70 },
+      { name: "海外（専）",  amountMan:   3.50, prevDiffMan: -869.87 },
+      { name: "In-Nihor",   amountMan:   0.35, prevDiffMan:   +0.35 },
     ],
   };
 
@@ -343,19 +379,42 @@
     /* ── 今月 ── */
     const mVsT = diffStr(month.revenueActual, month.revenueTarget);
     const mYoY = diffStr(month.revenueActual, month.lastYearActual);
+
+    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
+    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
+
+    // Hero: 当月目標達成率
+    setText('v-month-achievement', pctStr(month.revenueActual, month.revenueTarget), monthColor);
+
+    // 売上実績・目標（サブ表示）
     setText('v-month-actual',     yen(month.revenueActual));
     setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
+
+    // 残額インサイト
+    const remainingMan = month.revenueTarget - month.revenueActual;
+    setText('v-month-remaining',
+      remainingMan > 0
+        ? `目標まで残り ${yen(remainingMan)}`
+        : '目標達成！');
+
+    // セカンダリ KPI
     setText('v-month-vs-target',  mVsT, colorFor(mVsT));
     setText('v-month-yoy',        mYoY, colorFor(mYoY));
     setText('v-month-yoy-sub',    `昨年実績: ${yen(month.lastYearActual)}`);
 
-    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
-    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
+    // プログレスバー
     setText('prog-month-label', pctStr(month.revenueActual, month.revenueTarget), monthColor);
     const pm = $('prog-month');
     if (pm) {
-      pm.style.background = `linear-gradient(90deg, ${monthColor}99, ${monthColor})`;
+      pm.style.background = `linear-gradient(90deg, ${monthColor}66, ${monthColor})`;
       setTimeout(() => { pm.style.width = Math.min(monthPct, 100) + '%'; }, 300);
+    }
+
+    // カラーステータスバー（左端）
+    const statusBar = document.getElementById('month-status-bar');
+    if (statusBar) {
+      statusBar.style.background = monthColor;
+      statusBar.style.boxShadow  = `0 0 14px ${monthColor}99`;
     }
 
     /* ── 上半期 ── */
@@ -463,6 +522,10 @@
     const xOf = i => pad.l + (i + 0.5) * colW;
     const yOf = v => pad.t + ph * (1 - (v - yMin) / yRange);
 
+    const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    const gridColor = isLight ? '#d1d5db' : '#2a2a2a';
+    const axisColor = isLight ? '#9ca3af' : '#333333';
+
     const NS = 'http://www.w3.org/2000/svg';
     function se(tag, attrs) {
       const e = document.createElementNS(NS, tag);
@@ -478,14 +541,14 @@
     /* Grid — auto from data range */
     niceGrid(yMin, yMax, 500).forEach(v => {
       const y = yOf(v);
-      svg.appendChild(se('line', { x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: '#2a2a2a', 'stroke-width': 1 }));
+      svg.appendChild(se('line', { x1: pad.l, y1: y, x2: W - pad.r, y2: y, stroke: gridColor, 'stroke-width': 1 }));
       st(svg, pad.l - 6, y + 4, (v / 1000).toFixed(0) + 'K', {
         'text-anchor': 'end', fill: '#6b7280', 'font-size': 10,
         'font-family': '-apple-system,Inter,sans-serif',
       });
     });
 
-    svg.appendChild(se('line', { x1: pad.l, y1: yBot, x2: W - pad.r, y2: yBot, stroke: '#333', 'stroke-width': 1 }));
+    svg.appendChild(se('line', { x1: pad.l, y1: yBot, x2: W - pad.r, y2: yBot, stroke: axisColor, 'stroke-width': 1 }));
 
     /* Target bars */
     const bars = [];
