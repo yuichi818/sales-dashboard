@@ -116,17 +116,21 @@
       <div class="pb-2 flex flex-col gap-1">
         <p class="text-[1rem] font-bold text-gray-200" id="v-month-actual">—</p>
         <p class="text-xs text-gray-500" id="v-month-target-sub">—</p>
-        <p class="text-[.72rem] font-semibold text-gray-500" id="v-month-remaining">—</p>
       </div>
     </div>
 
     <!-- プログレスバー (太く・目立つ) -->
-    <div class="mb-5 h-[8px] bg-white/[.07] rounded-full overflow-hidden">
+    <div class="mb-3 h-[8px] bg-white/[.07] rounded-full overflow-hidden">
       <div id="prog-month"
            class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
       </div>
     </div>
     <span class="sr-only" id="prog-month-label">—</span>
+
+    <!-- ── Actionable Insight バー ── -->
+    <div id="month-insight-bar"
+         class="mb-4 px-3.5 py-2.5 rounded-xl bg-white/[.04] border border-white/[.06] text-xs leading-relaxed">
+    </div>
 
     <!-- ── セカンダリ KPI ── -->
     <div class="flex flex-wrap gap-2">
@@ -335,6 +339,20 @@
   };
   const isPos = s => s.startsWith('+');
 
+  /** 今日の翌営業日から月末までの営業日数を返す */
+  function calcWorkingDaysLeft() {
+    const now = new Date();
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    let count = 0;
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    while (d <= end) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++;
+      d.setDate(d.getDate() + 1);
+    }
+    return count;
+  }
+
   function colorFor(s) { return isPos(s) ? '#34d399' : '#fb7185'; }
 
   function gaugeColor(ratio) {
@@ -390,12 +408,33 @@
     setText('v-month-actual',     yen(month.revenueActual));
     setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
 
-    // 残額インサイト
+    // Actionable Insight バー
     const remainingMan = month.revenueTarget - month.revenueActual;
-    setText('v-month-remaining',
-      remainingMan > 0
-        ? `目標まで残り ${yen(remainingMan)}`
-        : '目標達成！');
+    const insightBar = document.getElementById('month-insight-bar');
+    if (insightBar) {
+      const daysLeft = calcWorkingDaysLeft();
+      if (remainingMan > 0) {
+        const dailyNeeded = remainingMan / Math.max(daysLeft, 1);
+        const dailyColor  = monthColor;
+        insightBar.innerHTML =
+          `<span class="text-gray-500">目標まで残り</span> ` +
+          `<span class="font-bold" style="color:${dailyColor}">${yen(remainingMan)}</span>` +
+          (daysLeft > 0
+            ? `<span class="mx-2 text-white/[.15]">|</span>` +
+              `<span class="text-gray-500">残 <span class="font-semibold text-gray-300">${daysLeft} 営業日</span></span>` +
+              `<span class="mx-2 text-white/[.15]">|</span>` +
+              `<span class="text-gray-500">1日あたり <span class="font-bold" style="color:${dailyColor}">${yen(dailyNeeded)}</span> 必要</span>`
+            : '');
+      } else {
+        const overMan = Math.abs(remainingMan);
+        insightBar.innerHTML =
+          `<span class="font-bold text-emerald-400">目標達成済！</span> ` +
+          `<span class="text-gray-500">超過</span> <span class="font-bold text-emerald-400">${yen(overMan)}</span>` +
+          (daysLeft > 0
+            ? `<span class="mx-2 text-white/[.15]">|</span><span class="text-gray-500">残 ${daysLeft} 営業日</span>`
+            : '');
+      }
+    }
 
     // セカンダリ KPI
     setText('v-month-vs-target',  mVsT, colorFor(mVsT));
