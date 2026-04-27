@@ -72,8 +72,6 @@
 
     #g-track { stroke: #e5e7eb !important; }
     #g-pct   { fill: #1a1a1a !important; }
-
-    #v-month-achievement { color: inherit !important; }
   }
 </style>
 </head>
@@ -99,51 +97,45 @@
   </header>
 
   <!-- ════ 今月 ════ -->
-  <section id="section-month" class="gb relative rounded-[22px] p-5 mb-3.5 backdrop-blur-sm overflow-hidden">
+  <section class="gb rounded-[22px] p-5 mb-3.5 backdrop-blur-sm">
+    <p class="text-base font-bold tracking-wide text-gray-200 mb-3.5">今月</p>
+    <div class="flex flex-wrap gap-2.5">
 
-    <!-- カラーステータスバー (左端) -->
-    <div id="month-status-bar"
-         class="absolute inset-y-0 left-0 w-[4px] rounded-l-[22px] transition-all duration-700"></div>
-
-    <p class="text-base font-bold tracking-wide text-gray-200 mb-4">今月</p>
-
-    <!-- ── Hero: 当月目標達成率 ── -->
-    <div class="flex items-end gap-4 mb-4">
-      <div>
-        <p class="text-[.65rem] font-semibold tracking-[.1em] uppercase text-gray-500 mb-2">当月目標達成率</p>
-        <p class="text-[3.6rem] font-extrabold leading-none tracking-tight" id="v-month-achievement">—</p>
-      </div>
-      <div class="pb-2 flex flex-col gap-1">
-        <p class="text-[1rem] font-bold text-gray-200" id="v-month-actual">—</p>
-        <p class="text-xs text-gray-500" id="v-month-target-sub">—</p>
-      </div>
-    </div>
-
-    <!-- プログレスバー (太く・目立つ) -->
-    <div class="mb-3 h-[8px] bg-white/[.07] rounded-full overflow-hidden">
-      <div id="prog-month"
-           class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
-      </div>
-    </div>
-    <span class="sr-only" id="prog-month-label">—</span>
-
-    <!-- ── Actionable Insight バー ── -->
-    <div id="month-insight-bar"
-         class="mb-4 px-3.5 py-2.5 rounded-xl bg-white/[.04] border border-white/[.06] text-xs leading-relaxed">
-    </div>
-
-    <!-- ── セカンダリ KPI ── -->
-    <div class="flex flex-wrap gap-2">
-      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+      <!-- 売上実績 ★ -->
+      <div class="flex-[2_1_155px] bg-gradient-to-br from-white/[.07] to-white/[.02]
+                  border border-white/[.16] rounded-2xl p-4 shadow-[0_0_28px_rgba(0,0,0,.25)]
                   hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">目標対比</p>
-        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">売上実績</p>
+        <p class="text-[2.1rem] font-extrabold leading-none tracking-tight" id="v-month-actual">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-target-sub">—</p>
       </div>
-      <div class="flex-1 min-w-[105px] bg-white/[.04] border border-white/[.08] rounded-xl p-3
+
+      <!-- 目標対比 -->
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
                   hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
-        <p class="text-[.63rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-1.5">昨年比</p>
-        <p class="text-[1.3rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
-        <p class="mt-1 text-[.65rem] text-gray-600" id="v-month-yoy-sub">—</p>
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">目標対比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-vs-target">—</p>
+      </div>
+
+      <!-- 昨年比 -->
+      <div class="flex-1 min-w-[110px] bg-white/[.04] border border-white/[.08] rounded-2xl p-4
+                  hover:-translate-y-0.5 transition-transform duration-200 cursor-default">
+        <p class="text-[.67rem] font-semibold tracking-[.08em] uppercase text-gray-500 mb-2">昨年比</p>
+        <p class="text-[1.85rem] font-extrabold leading-none tracking-tight" id="v-month-yoy">—</p>
+        <p class="mt-1.5 text-xs text-gray-500" id="v-month-yoy-sub">—</p>
+      </div>
+    </div>
+
+    <!-- 当月達成率バー -->
+    <div class="mt-4 flex items-center gap-2.5">
+      <div class="flex-1 h-[5px] bg-white/[.07] rounded-full overflow-hidden">
+        <div id="prog-month"
+             class="h-full rounded-full w-0 transition-[width] duration-[1200ms] ease-[cubic-bezier(.4,0,.2,1)] delay-300">
+        </div>
+      </div>
+      <div class="flex flex-col items-end">
+        <span class="text-xs font-bold whitespace-nowrap" id="prog-month-label">—</span>
+        <span class="text-[10px] text-gray-600">当月目標達成率</span>
       </div>
     </div>
   </section>
@@ -293,32 +285,32 @@
      DATA — single source of truth
   ══════════════════════════════════════════════════════════ */
   const DATA = {
-    period:   { month: '2026年4月度', halfYear: '下半期', updatedAt: '2026/04/20' },
+    period:   { month: '2026年4月度', halfYear: '下半期', updatedAt: '2026/04/27' },
     month: {
-      revenueActual:    858.8299000000001,
+      revenueActual:    1200.4834,
       revenueTarget:    700,
       lastYearActual:   1152.4426,
     },
     halfYear: {
-      actual: 2762.4587,
+      actual: 3104.1122,
       target: 4900,
     },
     deals: {
-      current:  73,
+      current:  122,
       previous: 151,
     },
     monthly: {
       months:   ['3月','4月','5月','6月','7月','8月'],
       target:   [1400, 700, 700, 700, 700, 700],
-      actual:   [1903.6288, 858.8299, 0, 0, 0, 0],
+      actual:   [1903.6288, 1200.4834, 0, 0, 0, 0],
       lastYear: [1176.9998, 1152.4426, 1052.9346, 1004.9134, 912.8346, 567.1432],
     },
     customers: [
-      { name: "＊ＯＲＩＥＮＴ４Ｃ'ｓ ＨＫ", amountMan: 209.2731, prevDiffMan: -702.5397 },
+      { name: "＊ＯＲＩＥＮＴ４Ｃ'ｓ ＨＫ", amountMan: 376.5941, prevDiffMan: -535.2187 },
       { name: "　Ａｌｌｉａｎｃｅ　Ｇｅｍ", amountMan: 206.83, prevDiffMan: 164.07000000000002 },
+      { name: "＊Dignity Diamond Taiwan", amountMan: 123.066, prevDiffMan: 79.73400000000001 },
+      { name: "　Ｙｅｏｎｈｗａ Ｃｏ,Ｌｔｄ", amountMan: 51.2665, prevDiffMan: -24.809 },
       { name: "　世佳㈱", amountMan: 43.6, prevDiffMan: 43.6 },
-      { name: "　Wedding　Code", amountMan: 18.900000000000002, prevDiffMan: -1.6 },
-      { name: "　Graceful Future Jewelry Limited", amountMan: 15.9091, prevDiffMan: -14.8909 },
     ],
   };
 
@@ -338,20 +330,6 @@
     return v >= 0 ? `+${v.toFixed(1)}%` : `${v.toFixed(1)}%`;
   };
   const isPos = s => s.startsWith('+');
-
-  /** 今日の翌営業日から月末までの営業日数を返す */
-  function calcWorkingDaysLeft() {
-    const now = new Date();
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    let count = 0;
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    while (d <= end) {
-      const day = d.getDay();
-      if (day !== 0 && day !== 6) count++;
-      d.setDate(d.getDate() + 1);
-    }
-    return count;
-  }
 
   function colorFor(s) { return isPos(s) ? '#34d399' : '#fb7185'; }
 
@@ -397,63 +375,19 @@
     /* ── 今月 ── */
     const mVsT = diffStr(month.revenueActual, month.revenueTarget);
     const mYoY = diffStr(month.revenueActual, month.lastYearActual);
-
-    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
-    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
-
-    // Hero: 当月目標達成率
-    setText('v-month-achievement', pctStr(month.revenueActual, month.revenueTarget), monthColor);
-
-    // 売上実績・目標（サブ表示）
     setText('v-month-actual',     yen(month.revenueActual));
     setText('v-month-target-sub', `目標: ${yen(month.revenueTarget)}`);
-
-    // Actionable Insight バー
-    const remainingMan = month.revenueTarget - month.revenueActual;
-    const insightBar = document.getElementById('month-insight-bar');
-    if (insightBar) {
-      const daysLeft = calcWorkingDaysLeft();
-      if (remainingMan > 0) {
-        const dailyNeeded = remainingMan / Math.max(daysLeft, 1);
-        const dailyColor  = monthColor;
-        insightBar.innerHTML =
-          `<span class="text-gray-500">目標まで残り</span> ` +
-          `<span class="font-bold" style="color:${dailyColor}">${yen(remainingMan)}</span>` +
-          (daysLeft > 0
-            ? `<span class="mx-2 text-white/[.15]">|</span>` +
-              `<span class="text-gray-500">残 <span class="font-semibold text-gray-300">${daysLeft} 営業日</span></span>` +
-              `<span class="mx-2 text-white/[.15]">|</span>` +
-              `<span class="text-gray-500">1日あたり <span class="font-bold" style="color:${dailyColor}">${yen(dailyNeeded)}</span> 必要</span>`
-            : '');
-      } else {
-        const overMan = Math.abs(remainingMan);
-        insightBar.innerHTML =
-          `<span class="font-bold text-emerald-400">目標達成済！</span> ` +
-          `<span class="text-gray-500">超過</span> <span class="font-bold text-emerald-400">${yen(overMan)}</span>` +
-          (daysLeft > 0
-            ? `<span class="mx-2 text-white/[.15]">|</span><span class="text-gray-500">残 ${daysLeft} 営業日</span>`
-            : '');
-      }
-    }
-
-    // セカンダリ KPI
     setText('v-month-vs-target',  mVsT, colorFor(mVsT));
     setText('v-month-yoy',        mYoY, colorFor(mYoY));
     setText('v-month-yoy-sub',    `昨年実績: ${yen(month.lastYearActual)}`);
 
-    // プログレスバー
+    const monthPct   = (month.revenueActual / month.revenueTarget) * 100;
+    const monthColor = gaugeColor(month.revenueActual / month.revenueTarget);
     setText('prog-month-label', pctStr(month.revenueActual, month.revenueTarget), monthColor);
     const pm = $('prog-month');
     if (pm) {
-      pm.style.background = `linear-gradient(90deg, ${monthColor}66, ${monthColor})`;
+      pm.style.background = `linear-gradient(90deg, ${monthColor}99, ${monthColor})`;
       setTimeout(() => { pm.style.width = Math.min(monthPct, 100) + '%'; }, 300);
-    }
-
-    // カラーステータスバー（左端）
-    const statusBar = document.getElementById('month-status-bar');
-    if (statusBar) {
-      statusBar.style.background = monthColor;
-      statusBar.style.boxShadow  = `0 0 14px ${monthColor}99`;
     }
 
     /* ── 上半期 ── */
@@ -708,57 +642,30 @@
     if (!container) return;
 
     const { customers } = DATA;
-
-    // 構成比はグランドトータル基準（全顧客合計 = 100%）
-    const totalAmt = customers.reduce((s, c) => s + c.amountMan, 0);
-
-    // 集中度インサイト
-    const top1Pct = (customers[0].amountMan / totalAmt * 100).toFixed(1);
-    const top2Pct = customers.length >= 2
-      ? ((customers[0].amountMan + customers[1].amountMan) / totalAmt * 100).toFixed(1)
-      : top1Pct;
+    const maxAmt = Math.max(...customers.map(c => c.amountMan));
 
     const RANK_STYLES = [
       { bg: 'linear-gradient(135deg,#fbbf24,#d97706)', fg: '#1c0f00' },
       { bg: 'linear-gradient(135deg,#94a3b8,#64748b)', fg: '#0f1623' },
       { bg: 'linear-gradient(135deg,#cd7f32,#92400e)', fg: '#fff7ed' },
     ];
-    // 構成比に応じた単色バー（グラデより視認しやすい）
-    const BAR_COLORS = ['#e5e7eb', '#9ca3af', '#6b7280', '#4b5563', '#374151'];
+    const BAR_GRADS = [
+      'from-[#e5e7eb] to-[#9ca3af]',
+      'from-[#9ca3af] to-[#6b7280]',
+      'from-[#6b7280] to-[#4b5563]',
+      'from-[#374151] to-[#2a2a2a]',
+    ];
 
-    // 万円を短く表示するヘルパー
-    const yenM = n => Math.abs(n) >= 1
-      ? `¥${Math.abs(n).toFixed(1)}万`
-      : `¥${(Math.abs(n) * 10000).toLocaleString()}`;
-
-    const insightHtml = `
-      <div class="mb-3 px-1.5 flex items-center gap-2 text-[.7rem] text-gray-500 flex-wrap">
-        <span>上位1社 <span class="font-semibold text-gray-300">${top1Pct}%</span></span>
-        <span class="text-white/[.15]">·</span>
-        <span>上位2社 <span class="font-semibold text-gray-300">${top2Pct}%</span> を占有</span>
-        <span class="ml-auto text-gray-600">← 構成比</span>
-      </div>`;
-
-    container.innerHTML = insightHtml + customers.map((c, i) => {
-      const rank     = i + 1;
-      const rs       = RANK_STYLES[i];
-      const barColor = BAR_COLORS[i] || BAR_COLORS[BAR_COLORS.length - 1];
-
-      // 構成比（全体合計基準）
-      const sharePct = (c.amountMan / totalAmt * 100).toFixed(1);
-
-      // 前月比: % と 万円額を両方
-      const pos      = c.prevDiffMan >= 0;
-      const prevAmt  = c.amountMan - c.prevDiffMan;
-      const diffPct  = prevAmt > 0.001
-        ? `${pos ? '+' : ''}${((c.prevDiffMan / prevAmt) * 100).toFixed(0)}%`
-        : null;
-      const diffAmt  = `${pos ? '+' : '−'}${yenM(c.prevDiffMan)}`;
-      const badgeTxt = diffPct ? `前月比 ${diffPct} (${diffAmt})` : `前月比 ${diffAmt}`;
+    container.innerHTML = customers.map((c, i) => {
+      const rank    = i + 1;
+      const rs      = RANK_STYLES[i];
+      const barGrad = BAR_GRADS[i] || BAR_GRADS[BAR_GRADS.length - 1];
+      const pct     = ((c.amountMan / maxAmt) * 100).toFixed(1);
+      const pos     = c.prevDiffMan >= 0;
+      const diffTxt = pos ? `+¥${(c.prevDiffMan * 10000).toLocaleString()}` : `−¥${(Math.abs(c.prevDiffMan) * 10000).toLocaleString()}`;
       const badgeClr = pos ? 'bg-emerald-400/[.12] text-emerald-400' : 'bg-rose-400/[.12] text-rose-400';
-
-      const delay     = (.10 + i * .08).toFixed(2);
-      const border    = i === 0 ? '' : 'border-t border-white/[.05]';
+      const delay   = (.10 + i * .08).toFixed(2);
+      const border  = i === 0 ? '' : 'border-t border-white/[.05]';
       const rankBadge = rs
         ? `<div class="w-8 h-8 rounded-full flex items-center justify-center text-[.78rem] font-extrabold shrink-0"
                 style="background:${rs.bg};color:${rs.fg}">${rank}</div>`
@@ -771,24 +678,21 @@
              role="listitem">
           ${rankBadge}
           <div class="flex flex-col gap-1.5 min-w-0">
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-[.88rem] font-semibold truncate" title="${c.name}">${c.name}</span>
-              <span class="text-[.65rem] text-gray-500 shrink-0">${sharePct}%</span>
-            </div>
-            <div class="h-1.5 bg-white/[.07] rounded-full overflow-hidden">
-              <div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms]"
-                   style="background:${barColor}"
-                   data-w="${sharePct}"></div>
+            <span class="text-[.88rem] font-semibold truncate" title="${c.name}">${c.name}</span>
+            <div class="h-1 bg-white/[.07] rounded-full overflow-hidden">
+              <div class="bar-fill h-full rounded-full w-0 transition-[width] duration-[900ms]
+                          bg-gradient-to-r ${barGrad}"
+                   data-w="${pct}"></div>
             </div>
           </div>
           <div class="flex flex-col items-end gap-1 shrink-0">
             <span class="text-[1.05rem] font-bold tracking-tight">¥${(c.amountMan * 10000).toLocaleString()}</span>
-            <span class="text-[.68rem] font-bold px-2 py-0.5 rounded-full ${badgeClr}">${badgeTxt}</span>
+            <span class="text-[.7rem] font-bold px-2 py-0.5 rounded-full ${badgeClr}">前月比 ${diffTxt}</span>
           </div>
         </div>`;
     }).join('');
 
-    /* Animate bars */
+    /* Animate bars (after DOM insert) */
     requestAnimationFrame(() => {
       container.querySelectorAll('.bar-fill').forEach((bar, i) => {
         if (reduceMotion) { bar.style.width = bar.dataset.w + '%'; return; }
