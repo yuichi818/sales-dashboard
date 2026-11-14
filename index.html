@@ -513,12 +513,12 @@
   {
     const total = sen(DATA.month.revenueActual)
     const rows = DATA.customers
-      .map(c => ({ name: String(c.name ?? '').replace(/^[\s　]+|[\s　]+$/g, ''), amt: sen(c.amountMan), diff: sen(c.prevDiffMan) }))
+      .map(c => ({ name: String(c.name ?? '').replace(/^[\s　]+|[\s　]+$/g, ''), man: Number(c.amountMan) || 0, amt: sen(c.amountMan), diff: sen(c.prevDiffMan) }))
       .filter(c => c.name && c.name !== '0' && c.amt !== 0)
       .sort((a, b) => b.amt - a.amt)
     window.__custOrder = rows.map(r => r.name)
-    const listed = rows.reduce((s, c) => s + c.amt, 0)
-    const other = total - listed
+    const listedMan = rows.reduce((s, c) => s + c.man, 0)
+    const other = sen((Number(DATA.month.revenueActual) || 0) - listedMan)   // 丸め誤差を出さないよう万円のまま差を取る
     const maxAmt = Math.max(...rows.map(r => r.amt), other, 1)
     const body = $('cust-body')
 
@@ -562,7 +562,7 @@
     const byName = Object.fromEntries(DATA.customers.map(c => [clean(c.name), c]))
     const rows = (window.__custOrder || []).map(n => {
       const c = byName[n]
-      return { name: n, amt: sen(c.amountMan), cur: toNum(c.cnt), prv: toNum(c.prevCnt), ly: toNum(c.lyCnt) }
+      return { name: n, man: Number(c.amountMan) || 0, amt: sen(c.amountMan), cur: toNum(c.cnt), prv: toNum(c.prevCnt), ly: toNum(c.lyCnt) }
     })
     const linked = rows.some(r => isFinite(r.cur))
 
@@ -600,7 +600,7 @@
         body.appendChild(e)
       }
       rows.forEach((r, i) => tr('', `<span class="rank">${i + 1}</span><span class="name">${esc(r.name)}</span>`, r, r.amt))
-      if (showOther) tr('other', '<span class="rank"></span>その他', other, sen(DATA.month.revenueActual) - rows.reduce((s, r) => s + r.amt, 0))
+      if (showOther) tr('other', '<span class="rank"></span>その他', other, sen((Number(DATA.month.revenueActual) || 0) - rows.reduce((s, r) => s + r.man, 0)))
       tr('total', '合計', tot, sen(DATA.month.revenueActual))
       set('s4-foot', '件数＝出庫明細の行数。比＝今月 ÷ 比較月。今月は途中経過のため、月末に向けて増えます。')
     }
